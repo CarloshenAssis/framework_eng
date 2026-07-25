@@ -1,0 +1,68 @@
+# Coordinate: core/standard.code-quality.review-baseline
+# component_type: Standard  (Structural Component — Domain Model §3)
+# Base normativa: Standards Architecture v1.0.0
+
+identity: core/standard.code-quality.review-baseline
+version: 1.0.0
+component_type: Standard
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Define o critério mínimo de conformidade para qualquer revisão de código
+  realizada por um Skill ou Agent do Framework.
+
+precedence_level: DOMAIN          # Constitution — hierarquia de 4 níveis
+standard_kind: NORMATIVE
+
+requirements:
+  - rid: nr.no-hardcoded-secrets
+    normative_keyword: MUST_NOT
+    statement: >
+      O código revisado MUST_NOT conter segredos, chaves de API ou
+      credenciais em texto plano.
+    rationale: >
+      Vazamento de credenciais é a categoria de achado mais cara de
+      remediar tardiamente — o requisito é MUST_NOT, não SHOULD_NOT.
+    target:
+      component_types: [Skill, Agent]
+      applies_to: ARTIFACT
+    evaluation:
+      kind: STATIC
+      deterministic: true
+      evidence:
+        evidence_kind: STRUCTURAL
+        reproducible: true
+        retention: PERMANENT      # ST9 — GLOBAL exigiria PERMANENT; aqui é DOMAIN, mas
+                                    # a natureza do achado (segurança) justifica reter
+        minimum_artifacts: 1
+    introduced_in: 1.0.0
+
+  - rid: nr.test-coverage-present
+    normative_keyword: SHOULD
+    statement: >
+      Toda mudança de código SHOULD ser acompanhada de teste correspondente.
+    target:
+      component_types: [Skill, Agent]
+      applies_to: ARTIFACT
+    evaluation:
+      kind: DYNAMIC
+      deterministic: true
+      evidence:
+        evidence_kind: TEST_RESULT
+        reproducible: true
+        retention: BOUNDED
+        retention_duration: P2Y
+        minimum_artifacts: 1
+    introduced_in: 1.0.0
+
+conformance_levels:
+  - name: BASE
+    requires: [nr.no-hardcoded-secrets]
+    description: "Nível mínimo — segurança inegociável, sem exigência de cobertura."
+
+  - name: EXTENDED
+    inherits_from: BASE            # monotônico — Standards §4.4
+    requires: [nr.no-hardcoded-secrets, nr.test-coverage-present]
+    description: "Nível recomendado para Skills de revisão em produção."
+
+retired_rids: []

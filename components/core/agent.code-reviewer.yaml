@@ -1,0 +1,78 @@
+# Coordinate: core/agent.code-reviewer
+# component_type: Agent  (Operational Component — Domain Model §3)
+# Base normativa: Agent Architecture v1.0.0
+
+identity: core/agent.code-reviewer
+version: 1.0.0
+component_type: Agent
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Ocupar o Role de Reviewer sobre Pull Requests, interpretar o relatório
+  produzido pela Skill de análise estática e decidir aprovação ou
+  solicitação de mudanças.
+
+inputs:
+  - name: review_report
+    type: artifact/json
+    required: true
+
+outputs:
+  - name: review_decision
+    type: artifact/json
+
+capabilities:
+  - role-eligibility.reviewer          # Agent §5.1 — elegibilidade expressa como Capability
+  - orchestration.code-review
+
+constraints:
+  - name: max-autonomous-risk-tier
+    kind: ENUM
+    field: role_class.risk_tier
+    values: [BAIXO, MEDIO]
+    description: >
+      Acima de MEDIO, toda Decision autorizada por este Agent MUST ser
+      coautorizada por Role humano (AG4, Agent Architecture §7).
+
+metadata:
+  standards_bound: []                  # este Agent não produz Artifact de código —
+                                        # a Skill que ele orquestra já está vinculada (Policy)
+
+templates:
+  - local_id: prompt.decision
+    kind: PROMPT
+    deterministic_expansion: true
+    variables:
+      - name: review_report
+        type: object
+        required: true
+        binding_source: PARAMETER
+    content: |
+      Com base no relatório de revisão abaixo, decida: APPROVE ou
+      REQUEST_CHANGES. Nunca aprove se existir achado de severidade
+      "blocker" pendente.
+
+      Relatório: {{review_report}}
+
+  - local_id: output.decision
+    kind: OUTPUT
+    deterministic_expansion: true
+    variables:
+      - name: verdict
+        type: string
+        required: true
+        binding_source: PARAMETER
+      - name: rationale
+        type: string
+        required: true
+        binding_source: PARAMETER
+      - name: decided_at
+        type: timestamp
+        required: true
+        binding_source: CONTEXT
+    content: |
+      {
+        "verdict": "{{verdict}}",
+        "rationale": "{{rationale}}",
+        "decided_at": "{{decided_at}}"
+      }

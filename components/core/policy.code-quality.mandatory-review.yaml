@@ -1,0 +1,35 @@
+# Coordinate: core/policy.code-quality.mandatory-review
+# component_type: Policy  (Structural Component — Domain Model §3)
+# Base normativa: Policy Architecture v1.0.0
+
+identity: core/policy.code-quality.mandatory-review
+version: 1.0.0
+component_type: Policy
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Exigir conformidade ao Standard de revisão de código para toda Skill/Agent
+  com capability de revisão, em qualquer Namespace do Framework.
+
+priority: 10
+
+scope:
+  namespaces: ["core", "org.*"]        # NamespacePattern — herdado por toda a árvore (Policy §7.1)
+  component_types: [Skill, Agent]
+  capabilities: ["static-analysis.code-review"]
+  applies_at: EXECUTION                 # Policy §8 — avaliado no dispatch, contra Context Snapshot
+
+condition: null                         # incondicional dentro do scope (PL17)
+
+bindings:
+  - standard: core/standard.code-quality.review-baseline@1.0.0
+    conformance_level: BASE
+    conformance_mode: STRICT             # PL15 não se aplica (Standard é DOMAIN, não GLOBAL),
+                                          # mas STRICT é escolha deliberada do autor da Policy
+
+enforcement_mode: BLOCKING               # não conformidade impede o dispatch (Policy §5.4)
+
+effective_from: "2026-07-25T00:00:00Z"
+expires_at: null
+
+overrides: []

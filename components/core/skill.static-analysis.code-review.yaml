@@ -1,0 +1,109 @@
+# Coordinate: core/skill.static-analysis.code-review
+# component_type: Skill  (Operational Component — Domain Model §3)
+# Base normativa: Skill Architecture v1.0.0 + Template Architecture v1.0.0
+
+identity: core/skill.static-analysis.code-review
+version: 1.0.0
+component_type: Skill
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Analisar um diff de código e produzir um relatório estruturado de
+  achados classificados por severidade.
+
+inputs:
+  - name: diff
+    type: text
+    required: true
+  - name: language
+    type: string
+    required: false
+    default: "auto-detect"
+
+outputs:
+  - name: review_report
+    type: artifact/json
+    description: "Lista de achados, cada um com arquivo, linha, severidade e sugestão."
+
+capabilities:
+  - static-analysis.code-review
+
+constraints:
+  - name: max-diff-size
+    kind: RANGE
+    field: diff
+    max_lines: 5000
+
+metadata:
+  standards_bound:
+    - standard: core/standard.code-quality.review-baseline@1.0.0
+      level: BASE                  # Kernel §2.14 — coexiste com Policy (Policy §7.5)
+
+# templates[] — Value Object habilitado por Kernel §9 (Extension Model),
+# especificado por Template Architecture §4.2 — não é campo de Manifest novo.
+templates:
+  - local_id: prompt.main
+    kind: PROMPT
+    deterministic_expansion: true
+    variables:
+      - name: diff
+        type: string
+        required: true
+        binding_source: PARAMETER
+      - name: language
+        type: string
+        required: false
+        default_value: "auto-detect"
+        binding_source: PARAMETER
+    content: |
+      Você é um revisor de código sênior. Analise o diff abaixo (linguagem: {{language}}).
+
+      Diff:
+      {{diff}}
+
+      Produza uma lista de achados, cada um com: arquivo, linha, severidade
+      (blocker | major | minor), categoria (secret | test | style | logic),
+      descrição e sugestão de correção. Nunca omita um achado de categoria
+      "secret" mesmo que pareça de baixa severidade.
+
+  - local_id: output.review_report
+    kind: OUTPUT
+    deterministic_expansion: true
+    variables:
+      - name: findings
+        type: array
+        required: true
+        binding_source: PARAMETER      # preenchido pelo resultado do processamento
+      - name: generated_at
+        type: timestamp
+        required: true
+        binding_source: CONTEXT        # RFC-DM-001 §3.2 — Context Snapshot, nunca "agora" recalculado
+    content: |
+      {
+        "findings": {{findings}},
+        "generated_at": "{{generated_at}}"
+      }
+
+# test_suite[] — Value Object, Testing Architecture §5.2
+test_suite:
+  - local_id: test.no-secrets-detected
+    kind: FUNCTIONAL
+    generated_by: MANUAL
+    input:
+      diff: "const apiKey = 'sk-live-abc123456789';"
+      language: "javascript"
+    assertion:
+      kind: PREDICATE
+      predicate: "findings.any(f => f.severity == 'blocker' && f.category == 'secret')"
+    covers:
+      - "core/standard.code-quality.review-baseline@1.0.0#nr.no-hardcoded-secrets"
+
+  - local_id: test.max-diff-size-boundary-reject
+    kind: FUNCTIONAL
+    generated_by: DERIVED            # Testing §9.1 — derivado do Constraint max-diff-size
+    input:
+      diff: "<diff sintético com 5001 linhas>"
+    assertion:
+      kind: PREDICATE
+      predicate: "outcome == 'REJECTED_INPUT_CONSTRAINT'"
+    covers: []

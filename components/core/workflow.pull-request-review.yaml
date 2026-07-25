@@ -1,0 +1,58 @@
+# Coordinate: core/workflow.pull-request-review
+# component_type: Workflow  (Operational Component — Domain Model §3)
+# Base normativa: Workflow Architecture v1.0.0
+
+identity: core/workflow.pull-request-review
+version: 1.0.0
+component_type: Workflow
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Orquestrar a revisão completa de um Pull Request: análise estática,
+  decisão de um Reviewer (humano ou Agent elegível) e registro do
+  resultado final.
+
+inputs:
+  - name: pull_request_diff
+    type: text
+    required: true
+
+outputs:
+  - name: final_decision
+    type: artifact/json
+
+# phases[] — Value Object habilitado por Kernel §9, especificado por Workflow §4.
+# NÃO é Component, NÃO tem Identity própria.
+phases:
+  - id: phase.static-review
+    steps:
+      - id: step.run-code-review
+        kind: INVOCATION
+        slot:
+          required_capability: static-analysis.code-review
+          version_range: "^1.0.0"
+          min_certification_level: L2       # Validation & Certification §5
+          cardinality: EXACTLY_ONE
+        failure_policy:
+          on_failure: ABORT
+    next: [phase.decision-gate]
+
+  - id: phase.decision-gate
+    steps:
+      - id: step.reviewer-decision
+        kind: GATE_APPROVAL                  # Workflow §4 — Decision + Decision Record
+        slot:
+          required_capability: role-eligibility.reviewer
+          version_range: "^1.0.0"
+          min_certification_level: L2
+          cardinality: EXACTLY_ONE
+        failure_policy:
+          on_failure: ABORT
+    next: []
+
+# Nota de integração (não normativa, apenas explicativa deste exemplo):
+# Composition resolve step.run-code-review -> core/skill.static-analysis.code-review@1.0.0
+# Composition resolve step.reviewer-decision -> core/agent.code-reviewer@1.0.0
+#   (SOMENTE produz Decision Record se o Agent resolvido possuir RoleAssignment
+#    vigente para RoleClass=Reviewer — Agent Architecture §6.2, AG3. Sem isso,
+#    a saída é classificada como Artifact comum, não como Decision institucional.)
