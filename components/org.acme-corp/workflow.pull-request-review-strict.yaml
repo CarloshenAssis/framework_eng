@@ -45,20 +45,33 @@ phases:
   - id: phase.risk-branch
     steps: []
     next:
-      - target: phase.human-only-gate
+      - target: phase.high-risk-gate
         condition: "review_report.findings.any(f => f.severity == 'blocker')"
       - target: phase.agent-gate
         condition: "!review_report.findings.any(f => f.severity == 'blocker')"
 
-  - id: phase.human-only-gate
+  # NOTA DE CORREÇÃO (registrada, não apagada — mesma disciplina de Standards §7,
+  # nunca reescrever silenciosamente): esta fase chamava-se "phase.human-only-gate".
+  # O nome estava ERRADO: nada em Composition Slot (required_capability,
+  # min_certification_level, cardinality) exclui estruturalmente um Agent de
+  # resolver este Slot — Slot não tem campo `occupant_kind`. L4 torna a
+  # ocupação por Agent rara e cara (Agent §6.1, AG2), mas não impossível.
+  # A garantia REAL, que este Slot de fato entrega, é AG4 (Agent Architecture
+  # §7): toda Decision de risco médio/alto autorizada aqui — seja o ocupante
+  # humano ou Agent — MUST ser coautorizada por um Role humano. É essa
+  # coautorização, não a exclusão de Agent, que torna este o gate de maior
+  # rigor. Renomeado para refletir a garantia real.
+  - id: phase.high-risk-gate
     steps:
-      - id: step.human-decision
+      - id: step.high-risk-decision
         kind: GATE_APPROVAL
         slot:
           required_capability: role-eligibility.reviewer
           version_range: "^1.0.0"
           min_certification_level: L4     # Validation & Certification §5 — L4 exige
-                                            # Certifier/decisor humano, nunca só Agent
+                                            # Certifier humano no PROCESSO DE CERTIFICAÇÃO
+                                            # do ocupante, e AG4 exige coautorização humana
+                                            # na PRÓPRIA Decision, independente do ocupante.
           cardinality: EXACTLY_ONE
         failure_policy:
           on_failure: ABORT

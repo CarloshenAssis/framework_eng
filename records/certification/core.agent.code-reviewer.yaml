@@ -1,0 +1,104 @@
+# Subject: core/agent.code-reviewer@1.0.0
+# Tipo de registro: Decision Record, família CertificationGrant (Domain Model §14)
+# Base normativa: Validation & Certification Architecture v1.0.0 §7
+#   ("Agent: cenários comportamentais representativos; L4 exige avaliação humana")
+#   + Agent Architecture v1.0.0 (§7 — AG4 coautorização)
+#
+# Cronologia deste arquivo é referenciada por records/role-assignment/reviewer.yaml
+# (L2 às 09:00 precede a concessão de RoleAssignment às 09:30 — AG2).
+
+subject: core/agent.code-reviewer@1.0.0
+manifest_digest: "sha256:PLACEHOLDER_DIGEST_OF_CANONICAL_MANIFEST_SERIALIZATION"
+
+certification_history:
+
+  # ── L1 — Structurally Valid ────────────────────────────────────────────
+  - level: L1
+    subtype: CertificationGrant
+    name: "Structurally Valid"
+    evidence:
+      - evidence_kind: STRUCTURAL
+        description: >
+          Kernel §8 Verification; templates[] validado (Template §9);
+          test_suite[] validado, incluindo o caso HUMAN_REVIEW (Testing §5.1,
+          Assertion.reviewer_role_class presente e resolúvel).
+        result: PASS
+        reproducible: true
+    authorized_by: role.system.kernel-validator
+    granted_at: "2026-07-25T08:00:00Z"
+    valid_until: null
+
+  # ── L2 — Functionally Validated ────────────────────────────────────────
+  # Único caso FUNCTIONAL do test_suite (determinístico) é suficiente para
+  # L2 — o caso BEHAVIORAL/HUMAN_REVIEW é avaliado separadamente (ver L4).
+  - level: L2
+    subtype: CertificationGrant
+    name: "Functionally Validated"
+    evidence:
+      - evidence_kind: TEST_RESULT
+        description: "TestRunReport — caso determinístico apenas"
+        test_run_id: "tr-01J8Y1PQXK6M4N7RVBHT2WD9CF"
+        outcome: PASS
+        results:
+          - test_case: "core/agent.code-reviewer@1.0.0#test.rejects-blocker-approval"
+            outcome: PASS
+          - test_case: "core/agent.code-reviewer@1.0.0#test.ambiguous-severity-mix"
+            outcome: PENDING_HUMAN_REVIEW   # não bloqueia L2 — cobertura de MUST/MUST_NOT
+                                              # aplicáveis já satisfeita pelo caso determinístico (TS9)
+        coverage:
+          requirements_covered:
+            - "core/standard.governance.agent-decision-integrity@1.0.0#nr.rationale-references-evidence"
+          coverage_ratio: 0.5   # 1 de 2 NRs cobertos por teste automatizado — suficiente para L2,
+                                  # o segundo (nr.no-self-referential-authority) é STATIC, coberto em L3
+    authorized_by: role.governance-area.code-quality.reviewer
+    granted_at: "2026-07-25T09:00:00Z"
+    valid_until: "2027-01-25T09:00:00Z"
+
+  # ── L3 — Standards Certified ───────────────────────────────────────────
+  - level: L3
+    subtype: CertificationGrant
+    name: "Standards Certified"
+    evidence:
+      - evidence_kind: CONFORMANCE_CLAIM
+        description: "Conformance Claim — Strict, obrigatório para L3 (Standards ST19)"
+        standard: core/standard.governance.agent-decision-integrity@1.0.0
+        conformance_level: BASE
+        mode: STRICT
+        satisfied:
+          - "core/standard.governance.agent-decision-integrity@1.0.0#nr.rationale-references-evidence"
+          - "core/standard.governance.agent-decision-integrity@1.0.0#nr.no-self-referential-authority"
+        unsatisfied_should: []
+        indeterminate: []
+    authorized_by: role.governance-area.code-quality.steward
+    granted_at: "2026-07-25T13:00:00Z"
+    valid_until: "2026-11-25T13:00:00Z"
+
+  # ── L4 — Institutionally Certified ─────────────────────────────────────
+  # Fecha test.ambiguous-severity-mix (PENDING_HUMAN_REVIEW desde L2).
+  - level: L4
+    subtype: CertificationGrant
+    name: "Institutionally Certified"
+    evidence:
+      - evidence_kind: TEST_RESULT
+        description: >
+          Reprodutibilidade da EXPANSÃO de Template (prompt.decision,
+          output.decision) — não do "raciocínio" do Agent, que é
+          legitimamente não determinístico (Template §7, distinção entre
+          expansão pura e processamento generativo subsequente). Expand()
+          reexecutado 3x com VariableBindingSet idêntico, resultado
+          byte-idêntico nas 3 execuções.
+        reproducible: true
+      - evidence_kind: ATTESTATION
+        description: >
+          Resolução do caso test.ambiguous-severity-mix (Assertion.kind=
+          HUMAN_REVIEW, Testing §9.2): revisado por
+          role.governance-area.code-quality.human-lead. Verdict do Agent
+          para o caso ("REQUEST_CHANGES", rationale citando achado "major/
+          style" como insuficiente para bloqueio automático mas recomendando
+          revisão) considerado apropriado. Outcome do TestCase atualizado de
+          PENDING_HUMAN_REVIEW para PASS nesta data.
+        producer_role_class: role.governance-area.code-quality.human-lead
+    certifier_role_id: role.governance-area.code-quality.human-lead
+    authorized_by: role.governance-area.code-quality.human-lead
+    granted_at: "2026-07-25T16:00:00Z"
+    valid_until: "2026-10-25T16:00:00Z"

@@ -1,0 +1,77 @@
+# Coordinate: core/standard.governance.agent-decision-integrity
+# component_type: Standard
+# Base normativa: Standards Architecture v1.0.0; Agent Architecture v1.0.0 (§6.2, §7)
+#
+# Fecha, em conteúdo real, a coluna "Foco da Conformance" já reservada por
+# Validation & Certification §7 para component_type=Agent: "Comportamento sob
+# ambiguidade + separação de funções."
+
+identity: core/standard.governance.agent-decision-integrity
+version: 1.0.0
+component_type: Standard
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Definir o critério mínimo de integridade decisória para qualquer Agent
+  que produza Decision institucional (Agent Architecture §6.2) — rastreabilidade
+  do raciocínio e ausência de autoaprovação, independentemente do RoleClass
+  ocupado.
+
+precedence_level: DOMAIN
+standard_kind: NORMATIVE
+
+requirements:
+  - rid: nr.rationale-references-evidence
+    normative_keyword: MUST
+    statement: >
+      Toda Decision autorizada por um Agent MUST incluir, em seu `rationale`,
+      referência explícita a pelo menos um achado/Evidence concreto do Artifact
+      de entrada que a motivou — nunca um veredito sem justificativa rastreável.
+    rationale: >
+      Sem isso, uma ProvenanceChain (Observability §5.4) responderia "quem
+      decidiu" mas não "por quê", esvaziando a pergunta 1 de Domain Model §15
+      ("de onde veio?") na prática, mesmo que estruturalmente respondível.
+    target:
+      component_types: [Agent]
+      applies_to: EXECUTION
+    evaluation:
+      kind: DYNAMIC
+      deterministic: true
+      evidence:
+        evidence_kind: TEST_RESULT
+        reproducible: true
+        retention: BOUNDED
+        retention_duration: P1Y
+        minimum_artifacts: 1
+    introduced_in: 1.0.0
+
+  - rid: nr.no-self-referential-authority
+    normative_keyword: MUST_NOT
+    statement: >
+      Um Agent MUST_NOT autorizar Decision sobre um Component do qual ocupe
+      simultaneamente o Role de Owner — reafirmação normativa, verificável por
+      Standard, da regra já estrutural AG5 (Agent Architecture §7).
+    rationale: >
+      AG5 já impede isso no algoritmo de GrantRoleAssignment (Agent §9) — este
+      NR existe para que a garantia também seja auditável como Conformance,
+      não apenas como precondição de autorização, dando a Compliance (quando
+      ratificada) um NR explícito para reportar contra.
+    target:
+      component_types: [Agent]
+      applies_to: EXECUTION
+    evaluation:
+      kind: STATIC
+      deterministic: true
+      evidence:
+        evidence_kind: STRUCTURAL
+        reproducible: true
+        retention: PERMANENT
+        minimum_artifacts: 1
+    introduced_in: 1.0.0
+
+conformance_levels:
+  - name: BASE
+    requires: [nr.rationale-references-evidence, nr.no-self-referential-authority]
+    description: "Nível único — ambos os requisitos são MUST, sem gradação."
+
+retired_rids: []

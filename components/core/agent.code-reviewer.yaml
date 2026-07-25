@@ -35,8 +35,12 @@ constraints:
       coautorizada por Role humano (AG4, Agent Architecture §7).
 
 metadata:
-  standards_bound: []                  # este Agent não produz Artifact de código —
-                                        # a Skill que ele orquestra já está vinculada (Policy)
+  standards_bound:
+    - standard: core/standard.governance.agent-decision-integrity@1.0.0
+      level: BASE                      # vinculação LOCAL e explícita (Kernel §2.14) —
+                                        # distinta da vinculação DERIVADA por Policy usada
+                                        # pela Skill (Policy §2.1); os dois mecanismos
+                                        # coexistem no mesmo repositório, sem conflito
 
 templates:
   - local_id: prompt.decision
@@ -76,3 +80,34 @@ templates:
         "rationale": "{{rationale}}",
         "decided_at": "{{decided_at}}"
       }
+
+# test_suite[] — Testing Architecture §5.2. Validation & Certification §7 já
+# nomeava, para Agent, "cenários comportamentais representativos; L4 exige
+# avaliação humana" — os dois casos abaixo cobrem exatamente isso: um caso
+# determinístico (rejeita autoaprovação, verificável por predicado puro) e um
+# caso de HUMAN_REVIEW (comportamento sob ambiguidade, único caso do
+# repositório a exercitar Assertion.kind=HUMAN_REVIEW até agora).
+test_suite:
+  - local_id: test.rejects-blocker-approval
+    kind: FUNCTIONAL
+    generated_by: MANUAL
+    input:
+      review_report: { findings: [{ severity: "blocker", category: "secret" }] }
+    assertion:
+      kind: PREDICATE
+      predicate: "verdict == 'REQUEST_CHANGES'"
+    covers:
+      - "core/standard.governance.agent-decision-integrity@1.0.0#nr.rationale-references-evidence"
+
+  - local_id: test.ambiguous-severity-mix
+    kind: BEHAVIORAL
+    generated_by: MANUAL
+    input:
+      review_report:
+        findings:
+          - { severity: "major", category: "style" }
+          - { severity: "minor", category: "logic" }
+    assertion:
+      kind: HUMAN_REVIEW               # Testing §9.2 — Outcome=PENDING_HUMAN_REVIEW até avaliação
+      reviewer_role_class: role.governance-area.code-quality.human-lead
+    covers: []

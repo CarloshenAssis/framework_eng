@@ -1,0 +1,55 @@
+# RoleClass: reviewer
+# Tipo de registro: Decision Record, família RoleAssignment (Agent Architecture §4.2)
+#
+# Formaliza como record persistido o exemplo que, até este ciclo, existia
+# apenas em prosa em docs/reference-cycle-walkthrough.md §1 — mesma
+# disciplina de nunca deixar um Decision Record referenciado só em
+# narrativa quando ele pode ser um artefato concreto.
+
+role_class: reviewer
+risk_tier: MEDIO          # ver Constraint max-autonomous-risk-tier em agent.code-reviewer.yaml
+
+# Mapeamento risk_tier → nível mínimo de Certificação exigido por AG2
+# (Agent §9, linha 4-6: MinimumLevelFor). Declarado aqui por ser o primeiro
+# RoleAssignment do repositório — futuros registros reutilizam a mesma tabela.
+minimum_level_by_risk_tier:
+  BAIXO: L1
+  MEDIO: L2
+  ALTO: L4
+
+assignments:
+  - subtype: ROLE_ASSIGNMENT_GRANT
+    occupant: core/agent.code-reviewer@1.0.0
+    # Concedida às 09:30, DEPOIS de o Agent atingir L2 às 09:00
+    # (records/certification/core.agent.code-reviewer.yaml) — AG2 exige
+    # que a certificação já satisfaça o mínimo NO MOMENTO da concessão,
+    # nunca pendente.
+    effective_from: "2026-07-25T09:30:00Z"
+    expires_at: "2027-01-25T09:30:00Z"
+    authorized_by: role.governance-area.code-quality.steward
+    co_authorized_by: role.governance-area.code-quality.human-lead
+    # AG4 (Agent Architecture §7): risk_tier=MEDIO já exige coautorização
+    # humana na concessão — presente acima, não opcional.
+    preconditions_verified:
+      - check: AG1_capability_declared
+        result: PASS
+        detail: "core/agent.code-reviewer@1.0.0 declara role-eligibility.reviewer"
+      - check: AG2_minimum_certification
+        result: PASS
+        detail: >
+          Certification.current_level(core/agent.code-reviewer@1.0.0) = L2
+          às 09:00:00Z ≥ MinimumLevelFor(MEDIO) = L2 às 09:30:00Z (momento
+          da concessão). Verificável em
+          records/certification/core.agent.code-reviewer.yaml.
+      - check: AG5_no_self_approval
+        result: PASS
+        detail: "Agent não é Owner de nenhum Component sobre o qual decide"
+
+# Nota: a Slot de org.acme-corp/workflow...strict, phase.high-risk-gate exige
+# min_certification_level=L4 — um requisito DA SLOT, verificado por Composition
+# a cada resolução, independente do nível exigido para a concessão desta
+# RoleAssignment (que foi L2, suficiente apenas para risk_tier=MEDIO). Antes
+# de o Agent atingir L4 (13:00–16:00, ver certificação), aquela Slot
+# especificamente retornaria SlotUnsatisfied mesmo com esta RoleAssignment
+# já vigente — os dois requisitos (elegibilidade de Role vs. nível mínimo
+# de uma Slot específica) são independentes por desenho.
