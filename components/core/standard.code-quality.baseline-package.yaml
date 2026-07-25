@@ -1,0 +1,58 @@
+# Coordinate: core/standard.code-quality.baseline-package
+# component_type: Standard, standard_kind: PACKAGE  (Standards Architecture §9)
+# Base normativa: Standards Architecture v1.0.0 §9
+#
+# Único mecanismo nomeado de arquitetura que, até este ciclo, não tinha
+# nenhum exemplo real: um Standard Package agrega, por `includes`, um
+# conjunto curado de Standards já existentes sob uma Coordinate própria e
+# versionada — para que uma Policy possa vincular-se a UM identificador em
+# vez de enumerar cada Standard individualmente.
+
+identity: core/standard.code-quality.baseline-package
+version: 1.0.0
+component_type: Standard
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Agregar, sob uma única Coordinate versionada, o conjunto mínimo de
+  Standards que qualquer Component com capability de revisão de código ou
+  de decisão institucional (Agent) deve satisfazer — para que Policies
+  futuras vinculem-se a um identificador em vez de enumerar Standards
+  individualmente.
+
+precedence_level: DOMAIN
+standard_kind: PACKAGE          # Standards §9 — restrições estruturais abaixo
+
+# requirements[] MUST ser vazio (Standards I11) — um Package agrega, não
+# define norma própria.
+requirements: []
+
+# extends[] MUST ser vazio (Standards I11) — Packages agregam via includes,
+# nunca especializam via extends.
+extends: []
+
+# includes[] MUST NOT ser vazio (Standards I11) — a razão de existir do Package.
+includes:
+  - core/standard.code-quality.review-baseline@1.0.0
+  - core/standard.governance.agent-decision-integrity@1.0.0
+
+conformance_levels:
+  - name: PACKAGE_BASE
+    # requires[] aqui referencia RIDs QUALIFICADOS pela Identity de origem
+    # (Standards §6.2 — includes preserva rid qualificado, nunca modifica) —
+    # o fecho transitivo de ambos os Standards incluídos.
+    requires:
+      - "core/standard.code-quality.review-baseline@1.0.0#nr.no-hardcoded-secrets"
+      - "core/standard.governance.agent-decision-integrity@1.0.0#nr.rationale-references-evidence"
+      - "core/standard.governance.agent-decision-integrity@1.0.0#nr.no-self-referential-authority"
+    description: >
+      Fecho transitivo dos dois Standards incluídos — satisfazer este nível
+      equivale a satisfazer BASE de ambos simultaneamente (Standards §6.2:
+      includes não modifica os NRs incorporados).
+
+retired_rids: []
+
+# Nota de versionamento (Standards §9, ST13 — não normativa aqui, apenas
+# ilustrativa): se qualquer Standard incluído publicar uma versão MAJOR,
+# este Package MUST também avançar para MAJOR — nunca incorporar breaking
+# change de um incluído sob uma MINOR própria.
