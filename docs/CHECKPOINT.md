@@ -1,111 +1,141 @@
 # Framework Eng — Checkpoint Institucional
 
-*Registrado em: 2026-07-25 · Branch: `claude/software-engineering-framework-fatdob`*
+*Atualizado em: 2026-07-25 · Branch: `claude/software-engineering-framework-fatdob`*
 
-> Este arquivo é um **ponto de controle**, não um documento arquitetural. Ele existe para que o estado do projeto sobreviva ao encerramento de qualquer sessão de conversa — todo o conteúdo integral dos documentos abaixo foi produzido ao longo da conversa, mas **ainda não foi transcrito para arquivos físicos no repositório** (ver "Ação pendente" ao final).
+> Este arquivo é um **ponto de controle**, não um documento arquitetural. Ele existe para que o estado do projeto sobreviva ao encerramento de qualquer sessão de conversa. Substitui integralmente a versão anterior deste checkpoint (que dizia "nenhum conteúdo real existe ainda" — isso deixou de ser verdade a partir dos ciclos de referência descritos na Seção 3).
 
 ---
 
 ## 1. Onde estamos
 
-O Framework Eng está na fase de **infraestrutura institucional (kernel-layer)**. Nenhum conteúdo de produto (Skills reais, Standards reais, Agentes reais, Templates reais, Workflows reais) foi criado ainda — o que existe é a **especificação normativa completa de como esse conteúdo deverá existir, ser validado, versionado, certificado e descoberto**.
+A infraestrutura institucional está **completa**: 20 documentos de arquitetura ratificados, do Constitution ao Packaging & Distribution, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, já existem **6 ciclos de referência** de conteúdo real (Standards, Policies, Skills, Agent, Workflows, Organization, records de Certificação/RoleAssignment/Knowledge) — um piloto pequeno e deliberado, não uma biblioteca em volume, cujo objetivo foi validar cada peça da arquitetura sobre dado concreto antes de qualquer geração em escala.
 
-Analogia útil: construímos um sistema operacional completo (kernel, registry, scheduler, sistema de arquivos, controle de versão, política de segurança) e ainda não instalamos nenhum programa nele.
-
----
-
-## 2. Documentos ratificados (base normativa congelada)
-
-Ordem de dependência — cada um assume os anteriores como imutáveis e reutiliza-os, nunca os altera.
-
-| # | Documento | Papel institucional | Status |
-|---|---|---|---|
-| 1 | **Constitution** | Princípios permanentes; missão, valores, hierarquia de decisões, regras imutáveis | ✅ Ratificado |
-| 2 | **Kernel Architecture** | Component Contract, Lifecycle (Draft→...→Removed), Manifest, dependências, validação, composição, interoperabilidade | ✅ Ratificado |
-| 3 | **Governance Architecture** | Ownership, Stewardship, RFC Process, Admission, Certification, Audit, Risk, Exception, Conflict Resolution | ✅ Ratificado |
-| 4 | **Domain Model v1.1.0** | As 14 entidades fundamentais (Component, Manifest, Execution, Artifact, Knowledge, Decision, Role, Metric...) | ✅ Ratificado (v1.0.0 → v1.1.0) |
-| 5 | **RFC-DM-001** | Emenda ao Domain Model: resolve C1 (colisão Knowledge/Knowledge Asset), C2 (Context Snapshot), C3 (`derives_from`), C4 (Framework/Domain indefinidos), H1 (overload "Domain"), H3 (cardinalidade Component:Manifest) | ✅ Ratificado |
-| 6 | **Identity & Namespace Architecture** | Coordinate/Versioned/Instance Identifier, ULID, árvore de Namespaces, resolução, lineage | ✅ Ratificado |
-| 7 | **Registry & Discovery Architecture** | Autoridade de resolução/descoberta; Registry Entry, Alias, Redirect, Lineage Index | ✅ Ratificado |
-| 8 | **Validation & Certification Architecture** | Verification/Testing/Validation/Conformance/Compliance/Certification distintos; níveis L0–L4 | ✅ Ratificado |
-| 9 | **Composition Architecture** | Assembly, Composition Slot, resolução de Providers, compatibilidade | ✅ Ratificado |
-| 10 | **Workflow Architecture** | Phase, Step, Gate (automático/aprovação), Branch, Join, Compensation, Failure Policy | ✅ Ratificado |
-| 11 | **Execution Architecture** | Execution Plan, Scheduler, correlação via Context (`orchestration_id`), Provenance Service (contrato conceitual) | ✅ Ratificado |
-| 12 | **Standards Architecture** | Normative Requirement, Requirement Identifier, Conformance Level, Strict/Partial Conformance, Standard Packages | ✅ Ratificado v1.0.0 |
-| 13 | **Policy Architecture** | Policy Binding, Scope, Effective Policy Set, resolução de conflito, `applies_at` | ✅ Ratificado v1.0.0 |
-| 14 | **Template Architecture** | Prompt/Input/Output Template como Value Object; determinismo de expansão | ✅ Ratificado v1.0.0 |
-| 15 | **Skill Architecture** | Skill = Operational Component puro; fecha certificação de Skill (Validation §7) | ✅ Ratificado v1.0.0 |
-| 16 | **Observability Architecture** | Trace, Span, Provenance Chain (Value Objects efêmeros); fecha Provenance Service (Execution §14) | ✅ Ratificado v1.0.0 |
-
-**Nota:** um rascunho de *Compliance Architecture* foi produzido no Bloco 4, mas **não foi ratificado** como base normativa — permanece explicitamente como consumidor downstream, não congelado.
+Analogia atualizada: o sistema operacional está completo e **um programa de referência já roda nele**, ponta a ponta, com falhas e recuperação reais — mas a "loja de aplicativos" (biblioteca ampla de Standards/Skills/Agents/Workflows) ainda não existe.
 
 ---
 
-## 3. Princípios estruturais provados ao longo de 16 documentos
+## 2. Documentos de arquitetura ratificados (base normativa congelada)
 
-- **Zero inflação de entidade**: nenhum documento após o Domain Model introduziu uma entidade nova sem RFC formal — apenas RFC-DM-001 alterou o Domain Model (uma única vez, no início).
-- **Reuso em vez de criação**: mecanismos como *cycle detection* (Kernel §7) foram reaplicados no mínimo 6 vezes (dependências de Component, `derives_from`, grafo de Workflow, grafo de Composition, `extends/includes` de Standards, cadeia de `overrides` de Policy, herança de Templates).
-- **Distinção Entity vs. Value Object (DDD)** aplicada consistentemente: Component/Execution/Artifact/Knowledge/Decision/Role têm identidade própria; Capability/Phase/Step/NormativeRequirement/PolicyBinding/Template/Trace/Span são Value Objects sem identidade, escopados ao Contract que os contém.
-- **Separação de responsabilidade normativa**: Standard define critério (nunca contexto) · Policy define aplicabilidade (nunca critério) · Compliance avalia continuamente (não ratificado) · Certification atesta pontualmente · Observability apenas consulta, nunca decide ou executa.
-- **Nenhuma RFC adicional** foi necessária desde RFC-DM-001 — dez documentos consecutivos (Composition até Observability) provaram formalmente, cada um, que a base é suficientemente expressiva.
-
----
-
-## 4. O que NÃO existe ainda
-
-- Nenhuma Skill real (DDD, REST, PostgreSQL, LGPD...)
-- Nenhum Standard real (coding-standard, security-standard...)
-- Nenhum Agente (Discovery Agent, Product Manager, Architect...)
-- Nenhum Template real (PRD, ADR, User Story...)
-- Nenhum Workflow real (SaaS, GovTech, HealthTech...)
-- **Agent Architecture** — o último documento de infraestrutura pendente (Skill *faz*; Agent *decide*)
-
----
-
-## 5. Roadmap
-
-```
-[RATIFICADO — infraestrutura]
-Constitution → Kernel → Governance → Domain Model v1.1 (RFC-DM-001) →
-Identity & Namespace → Registry & Discovery → Validation & Certification →
-Composition → Workflow → Execution → Standards → Policy →
-Template → Skill → Observability
-
-[PRÓXIMO — fecha a infraestrutura]
-17. Agent Architecture           ← decide vs. executa; fecha H2 (separação de funções) no caso geral
-18. Organization & Tenancy Architecture   ← preenche slot já reservado (Identity §8/§10)
-19. Testing Architecture         ← desbloqueado por Observability (trace/debug/query_events)
-20. Packaging & Distribution Architecture
-
-[DEPOIS — camada de conteúdo, só começa com infraestrutura fechada]
-21. Standards reais (biblioteca)
-22. Skills reais (biblioteca)
-23. Templates reais (biblioteca)
-24. Agentes reais (biblioteca)
-25. Workflows reais (biblioteca)
-26. Orchestrator (agente coordenador de todo o ciclo)
-```
-
----
-
-## 6. Riscos e lacunas abertas (`[LACUNA proposital]` declaradas)
-
-| Lacuna | Origem | Endereçada por |
+| # | Documento | Papel institucional |
 |---|---|---|
-| Armazenamento físico/escala do Provenance Service | Execution §14 | ✅ Fechada por Observability §6-§7 |
-| Formato físico de serialização (bytes, encoding) | Standards §3.2, Template §3.2 | Pendente — Packaging & Distribution |
-| Formato de exportação de métricas (wire format) | Observability §17 | Pendente — Packaging & Distribution |
-| Modelo interno de Organization (billing, membership, quotas) | Identity §10, Policy §3.2 | Pendente — Organization & Tenancy |
-| Evidence para `EvaluationMethod = DYNAMIC` em escala | Standards §19, Skill §17 | Pendente — Testing Architecture |
-| Separação de funções para Role ocupado por Agent (caso geral, além de L4) | Achado H2, parcialmente resolvido em Validation & Certification §5 | Pendente — **Agent Architecture** |
+| 1 | Constitution | Princípios permanentes, hierarquia de decisões, regras imutáveis |
+| 2 | Kernel Architecture | Component Contract, Lifecycle, Manifest, composição, interoperabilidade |
+| 3 | Governance Architecture | Ownership, Stewardship, RFC Process, Admission, Audit, Risk, Exception |
+| 4 | Domain Model v1.1.0 | 14 entidades fundamentais |
+| 5 | RFC-DM-001 | Emenda: C1 (Knowledge/Knowledge Asset), C2 (Context Snapshot), C3 (`derives_from`), C4, H1, H3 |
+| 6 | Identity & Namespace Architecture | Coordinate/Versioned/Instance Identifier, Namespaces, lineage |
+| 7 | Registry & Discovery Architecture | Resolução/descoberta, Registry Entry, Redirect, Lineage Index |
+| 8 | Validation & Certification Architecture | Verification/Testing/Validation/Certification distintos; L0–L4 |
+| 9 | Composition Architecture | Assembly, Composition Slot, resolução de Providers |
+| 10 | Workflow Architecture | Phase, Step, Gate, Branch, Compensation, Failure Policy |
+| 11 | Execution Architecture | Scheduler, correlação via Context, Provenance Service |
+| 12 | Standards Architecture v1.0.0 | Normative Requirement, Conformance Level, Strict/Partial Conformance |
+| 13 | Policy Architecture v1.0.0 | Policy Binding, Scope, Effective Policy Set |
+| 14 | Template Architecture v1.0.0 | Prompt/Input/Output Template, determinismo de expansão |
+| 15 | Skill Architecture v1.0.0 | Skill = Operational Component puro |
+| 16 | Observability Architecture v1.0.0 | Trace, Span, Provenance Chain, fecha Provenance Service |
+| 17 | Agent Architecture v1.0.0 | RoleAssignment, Decision institucional, fecha H2 |
+| 18 | Organization & Tenancy Architecture v1.0.0 | Organization como Component, Membership, isolamento |
+| 19 | Testing Architecture v1.0.0 | Test Case, Test Run Report, Cobertura, Regressão |
+| 20 | Packaging & Distribution Architecture v1.0.0 | Bundle, integridade em trânsito, exportação de métricas |
 
-**Risco psicológico identificado e aceito como vigilância contínua:** tendência de introduzir conceitos "que parecem úteis" (Memory Manager, Prompt Manager, Runtime Engine, Agent Controller) sem necessidade real. A disciplina de reuso mantida até aqui é o ativo mais valioso do projeto — deve ser preservada com o mesmo rigor em Agent Architecture.
+**Nota:** um rascunho de *Compliance Architecture* foi produzido no Bloco 4, mas **não foi ratificado** — permanece consumidor downstream, não congelado.
+
+**Nenhuma RFC além de RFC-DM-001** foi necessária em dezenove documentos consecutivos de arquitetura — todos comprovaram formalmente, cada um, que a base é suficientemente expressiva.
 
 ---
 
-## 7. Ação pendente
+## 3. Conteúdo real — 6 ciclos de referência
 
-O texto integral dos 16 documentos existe apenas no histórico desta conversa. Este checkpoint registra **status e índice**, não o conteúdo normativo completo. Transcrição dos documentos para arquivos físicos (`docs/constitution.md`, `docs/kernel-architecture.md`, etc.) permanece uma tarefa em aberto, a ser feita sob demanda explícita.
+Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualquer coisa deve existir), o conteúdo abaixo é **instância real**, em `components/` e `records/`.
+
+| Ciclo | O que instancia | O que prova |
+|---|---|---|
+| 1 | Standard, Policy, Skill (com Templates), Agent, Workflow — domínio "revisão de PR" | Cadeia completa Composition→Execution→Policy→Agent→Observability funciona |
+| 2 | `org.acme-corp` (Organization real), Standard via `extends`, Policy escopada, Workflow com `Branch` | Isolamento multi-tenant, extensão normativa segura, acúmulo de Policies, roteamento condicional |
+| 3 | Certificação L1→L4 completa da Skill do Ciclo 1 | `records/` como home de Decision Records; Registry lendo certificação por read-through |
+| 4 | Correção de nomenclatura (`human-only-gate`→`high-risk-gate`); certificação L1→L4 do Agent; RoleAssignment formalizada | Erro real encontrado e corrigido (AG2: certificação deve preceder RoleAssignment); gate antes bloqueado agora resolve |
+| 5 | 3 Skills novas (uma sem `templates[]`); Workflow com paralelismo, Retry, Compensação (Saga) | Todo o vocabulário de Workflow §4 exercitado — nada ficou só em prosa |
+| 6 | `Knowledge` derivada de Executions do Ciclo 5; `Playbook` (Knowledge Asset) que a `codifies` | Fecha RFC-DM-001 C1 em conteúdo real; `derives_from` e `provenance()` sobre Knowledge, não só Artifact |
+
+Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execution real foi processada por um runtime — os ciclos são ilustrativos, mostrando a forma exata que os artefatos assumiriam.
+
+---
+
+## 4. Princípios estruturais provados
+
+- **Zero inflação de entidade** em 20 documentos de arquitetura + 6 ciclos de conteúdo.
+- **Reuso em vez de criação**: *cycle detection* (Kernel §7) reaplicado 6+ vezes; padrão "Value Object escopado a Contract" usado por Capability/Phase/Step/NormativeRequirement/PolicyBinding/Template/TestCase; padrão "família nomeada de Decision" usado por CertificationGrant/RoleAssignment.
+- **Correção sem reescrita silenciosa**: dois erros reais foram encontrados durante a instanciação de conteúdo (nome de fase prometendo garantia inexistente; ordem AG2 violada) — ambos corrigidos com nota explicando o quê, por quê, quando — nunca apagados.
+- **Nenhuma RFC adicional** foi necessária em nenhum momento, nem durante a arquitetura, nem durante os 6 ciclos de conteúdo.
+
+---
+
+## 5. O que ainda NÃO existe
+
+- Biblioteca ampla de Standards/Skills/Agents/Workflows (o piloto tem ~4 Skills, 1 Agent, 4 Workflows — não dezenas)
+- `Compliance Architecture` ratificada
+- `Standard Package` (`standard_kind: PACKAGE`) instanciado em conteúdo
+- `Bundle` (export/import via Packaging & Distribution) demonstrado em conteúdo
+- Query real de `Observability` (trace/provenance) mostrada como saída literal, não só narrada
+- Domínio de conteúdo fora de "revisão de código/release" — todo o piloto é de um único domínio
+
+---
+
+## 6. Roadmap
+
+```
+[RATIFICADO — infraestrutura completa, 20 documentos]
+Constitution → ... → Agent → Organization & Tenancy → Testing → Packaging & Distribution
+
+[EM ANDAMENTO — piloto de conteúdo, 6 ciclos]
+Reference Cycle 1-6 (components/, records/)
+
+[CANDIDATOS PARA PRÓXIMOS CICLOS — sem ordem obrigatória]
+- Standard Package (agregação via includes)
+- Export/import de Bundle (Packaging & Distribution)
+- Segundo domínio de conteúdo (fora de code-quality/release)
+- Compliance Architecture (se decidido ratificar)
+
+[DEPOIS — biblioteca em volume, só após decisão explícita de escalar]
+Standards/Skills/Templates/Agents/Workflows reais em quantidade
+Orchestrator (agente coordenador do ciclo completo)
+```
+
+---
+
+## 7. Riscos e lacunas conhecidas
+
+| Lacuna | Origem | Status |
+|---|---|---|
+| Armazenamento físico/escala do Provenance Service | Execution §14 | ✅ Fechada — Observability §6-§7 |
+| Formato físico de serialização | Standards §3.2, Template §3.2 | ✅ Fechada — Packaging & Distribution §5 |
+| Formato de exportação de métricas | Observability §17 | ✅ Fechada — Packaging & Distribution §9.4 |
+| Modelo interno de Organization (billing, quotas) | Identity §10 | Deliberadamente deferida — `Resource & Quota Architecture` futura |
+| Separação de funções, Role ocupado por Agent (caso geral) | Achado H2 | ✅ Fechada — Agent Architecture §7 (AG4/AG5) |
+| Evidence para `EvaluationMethod=DYNAMIC` em escala | Standards §19 | ✅ Fechada — Testing Architecture |
+
+**Risco psicológico** (mantido da versão anterior deste checkpoint, ainda vigente): tendência de introduzir conceitos que "parecem úteis" sem necessidade real. A disciplina de reuso — inclusive durante a instanciação de conteúdo, onde dois erros reais foram corrigidos em vez de mascarados — continua sendo o ativo mais valioso do projeto.
+
+---
+
+## 8. Estrutura do repositório
+
+```
+docs/                          arquitetura (índice — texto integral só no histórico da conversa)
+  CHECKPOINT.md                 este arquivo
+  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..6)
+components/                    Manifests reais de Component (Standard/Policy/Skill/Agent/Workflow/Organization/Playbook)
+  core/                          namespace compartilhado
+  org.acme-corp/                 namespace de tenant, filho de core/
+records/                       Decision Records instanciados (Certification, RoleAssignment, Knowledge)
+```
+
+---
+
+## 9. Ação pendente
+
+O texto integral dos 20 documentos de arquitetura existe apenas no histórico desta conversa — este checkpoint continua sendo índice/status, não o conteúdo normativo completo. Transcrição para arquivos físicos (`docs/constitution.md` etc.) permanece em aberto, sob demanda explícita.
 
 ---
 
