@@ -1,0 +1,51 @@
+# Coordinate: core/skill.documentation.completeness-check
+# component_type: Skill
+# Base normativa: Skill Architecture v1.0.0
+#
+# Skill puramente funcional e determinística — SEM templates[], segundo
+# caso do repositório a exercitar esse caminho (o primeiro foi
+# core/skill.security.dependency-audit, Ciclo 5).
+
+identity: core/skill.documentation.completeness-check
+version: 1.0.0
+component_type: Skill
+lifecycle_state: Active
+owner: role.governance-area.documentation.steward
+purpose: >
+  Verificar se uma referência de API gerada satisfaz o Standard de
+  completude — checagem estrutural, nunca geração.
+
+inputs:
+  - name: api_reference_doc
+    type: artifact/markdown
+    required: true
+  - name: openapi_spec
+    type: text
+    required: true
+
+outputs:
+  - name: completeness_report
+    type: artifact/json
+
+capabilities:
+  - documentation.completeness-check
+
+constraints: []
+
+metadata:
+  standards_bound:
+    - standard: core/standard.documentation.api-reference-completeness@1.0.0
+      level: BASE
+
+test_suite:
+  - local_id: test.flags-missing-error-doc
+    kind: FUNCTIONAL
+    generated_by: MANUAL
+    input:
+      api_reference_doc: "# API Reference\n## GET /users/{id}\nRetorna um usuário."
+      openapi_spec: "paths: { /users/{id}: { get: { responses: { '404': {} } } } } }"
+    assertion:
+      kind: PREDICATE
+      predicate: "completeness_report.violations.any(v => v.rid == 'nr.every-error-response-documented')"
+    covers:
+      - "core/standard.documentation.api-reference-completeness@1.0.0#nr.every-error-response-documented"

@@ -1,0 +1,60 @@
+# Coordinate: core/standard.documentation.api-reference-completeness
+# component_type: Standard
+# Base normativa: Standards Architecture v1.0.0
+
+identity: core/standard.documentation.api-reference-completeness
+version: 1.0.0
+component_type: Standard
+lifecycle_state: Active
+owner: role.governance-area.documentation.steward
+purpose: >
+  Definir o critério mínimo de completude para referências de API geradas
+  automaticamente a partir de uma especificação OpenAPI.
+
+precedence_level: DOMAIN
+standard_kind: NORMATIVE
+
+requirements:
+  - rid: nr.every-endpoint-has-description
+    normative_keyword: MUST
+    statement: >
+      Todo endpoint documentado MUST incluir uma descrição textual não vazia.
+    target:
+      component_types: [Skill]
+      applies_to: ARTIFACT
+    evaluation:
+      kind: STATIC
+      deterministic: true
+      evidence:
+        evidence_kind: STRUCTURAL
+        reproducible: true
+        retention: BOUNDED
+        retention_duration: P1Y
+        minimum_artifacts: 1
+    introduced_in: 1.0.0
+
+  - rid: nr.every-error-response-documented
+    normative_keyword: MUST
+    statement: >
+      Todo código de resposta de erro (4xx/5xx) declarado na especificação
+      MUST estar documentado com sua causa e formato de payload.
+    target:
+      component_types: [Skill]
+      applies_to: ARTIFACT
+    evaluation:
+      kind: STATIC
+      deterministic: true
+      evidence:
+        evidence_kind: STRUCTURAL
+        reproducible: true
+        retention: BOUNDED
+        retention_duration: P1Y
+        minimum_artifacts: 1
+    introduced_in: 1.0.0
+
+conformance_levels:
+  - name: BASE
+    requires: [nr.every-endpoint-has-description, nr.every-error-response-documented]
+    description: "Nível único — ambos MUST, sem gradação."
+
+retired_rids: []

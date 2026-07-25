@@ -1,0 +1,78 @@
+# Coordinate: core/skill.documentation.api-reference-generator
+# component_type: Skill
+# Base normativa: Skill Architecture v1.0.0; Template Architecture v1.0.0
+
+identity: core/skill.documentation.api-reference-generator
+version: 1.0.0
+component_type: Skill
+lifecycle_state: Active
+owner: role.governance-area.documentation.steward
+purpose: >
+  Gerar uma referência de API em Markdown a partir de uma especificação
+  OpenAPI, um endpoint por seção, com descrição e respostas de erro.
+
+inputs:
+  - name: openapi_spec
+    type: text
+    required: true
+
+outputs:
+  - name: api_reference_doc
+    type: artifact/markdown
+
+capabilities:
+  - documentation.api-reference-generation
+
+constraints: []
+
+metadata:
+  standards_bound: []     # deliberadamente não vinculada — quem valida completude
+                            # é a Skill seguinte no pipeline (separação de papéis:
+                            # gerar não é o mesmo que validar)
+
+templates:
+  - local_id: prompt.main
+    kind: PROMPT
+    deterministic_expansion: true
+    variables:
+      - name: openapi_spec
+        type: string
+        required: true
+        binding_source: PARAMETER
+    content: |
+      Gere, para cada endpoint da especificação OpenAPI abaixo, uma seção em
+      Markdown com: descrição, parâmetros, resposta de sucesso, e TODA
+      resposta de erro (4xx/5xx) declarada — com causa e formato de payload.
+
+      Especificação:
+      {{openapi_spec}}
+
+  - local_id: output.api_reference
+    kind: OUTPUT
+    deterministic_expansion: true
+    variables:
+      - name: endpoints_markdown
+        type: string
+        required: true
+        binding_source: PARAMETER
+      - name: generated_at
+        type: timestamp
+        required: true
+        binding_source: CONTEXT
+    content: |
+      # API Reference
+
+      _Gerado automaticamente em {{generated_at}}._
+
+      {{endpoints_markdown}}
+
+test_suite:
+  - local_id: test.includes-error-response-section
+    kind: FUNCTIONAL
+    generated_by: MANUAL
+    input:
+      openapi_spec: "paths: { /users/{id}: { get: { responses: { '404': { description: 'not found' } } } } } }"
+    assertion:
+      kind: PREDICATE
+      predicate: "api_reference_doc.contains('404') && api_reference_doc.contains('not found')"
+    covers: []

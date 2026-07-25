@@ -1,0 +1,67 @@
+# Coordinate: core/workflow.api-documentation-pipeline
+# component_type: Workflow
+# Base normativa: Workflow Architecture v1.0.0
+#
+# Primeiro Workflow do repositório SEM Agent, SEM GATE_APPROVAL, SEM Branch —
+# um pipeline gerar→validar de duas Phases sequenciais. Também o primeiro a
+# usar GATE_AUTO (Workflow §4) — os cinco ciclos anteriores só haviam
+# exercitado GATE_APPROVAL.
+
+identity: core/workflow.api-documentation-pipeline
+version: 1.0.0
+component_type: Workflow
+lifecycle_state: Active
+owner: role.governance-area.documentation.steward
+purpose: >
+  Gerar a referência de API de um serviço a partir de sua especificação
+  OpenAPI e validá-la estruturalmente contra o Standard de completude,
+  sem exigir decisão humana ou de Agent — falha de completude é tratada
+  como falha automática do pipeline, não como algo a ser aprovado.
+
+inputs:
+  - name: openapi_spec
+    type: text
+    required: true
+
+outputs:
+  - name: final_report
+    type: artifact/json
+
+phases:
+  - id: phase.generate
+    steps:
+      - id: step.generate-reference
+        kind: INVOCATION
+        slot:
+          required_capability: documentation.api-reference-generation
+          pinned_coordinate: core/skill.documentation.api-reference-generator@1.0.0
+          version_range: "^1.0.0"
+          min_certification_level: L1
+          cardinality: EXACTLY_ONE
+        failure_policy: { on_failure: ABORT }
+    next: [phase.validate]
+
+  - id: phase.validate
+    steps:
+      - id: step.check-completeness
+        # GATE_AUTO — Workflow §4: "realizado como uma Execution que produz
+        # Evidence; gate passa/falha com base no conteúdo da Evidence — sem
+        # Decision, sem Role, sem Governance §8 envolvida." Diferente de
+        # GATE_APPROVAL (usado em todos os ciclos anteriores), aqui não há
+        # ninguém "decidindo" — o resultado É o veredito.
+        kind: GATE_AUTO
+        slot:
+          required_capability: documentation.completeness-check
+          pinned_coordinate: core/skill.documentation.completeness-check@1.0.0
+          version_range: "^1.0.0"
+          min_certification_level: L1
+          cardinality: EXACTLY_ONE
+        failure_policy: { on_failure: ABORT }
+    next: []
+
+# Nota de composição (não normativa, ilustrativa):
+# step.check-completeness.slot vincula-se, através da própria Skill
+# (standards_bound), ao Standard de completude — este Workflow não precisa
+# declarar Policy própria: a exigência já é local e explícita na Skill,
+# exatamente o mecanismo de Kernel §2.14 que Policy §7.5 sempre disse
+# coexistir com vinculação derivada por Policy, sem exigir as duas.
