@@ -1,0 +1,56 @@
+# Coordinate: core/playbook.incident-response.deployment-rollback
+# component_type: Playbook  (subtipo de Knowledge Asset — Domain Model §3,
+#                             renomeado de "Knowledge Component" por RFC-DM-001 §3.1)
+# Base normativa: Domain Model v1.1.0 §11; RFC-DM-001 §3.1; Validation & Certification §7
+#
+# Diferença de identidade em relação a todo conteúdo anterior: este é o
+# primeiro Component do repositório cuja existência normativa é
+# INTEIRAMENTE derivada de Knowledge (via `codifies`), não de um Standard
+# ou de uma capacidade operacional própria.
+
+identity: core/playbook.incident-response.deployment-rollback
+version: 1.0.0
+component_type: Playbook
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Consolidar, como guia de resposta reutilizável, o padrão observado de
+  falha e recuperação em deployments de core/workflow.release-readiness —
+  para consulta por humanos ou Agents respondendo a incidentes futuros.
+
+capabilities:
+  - knowledge.incident-response.deployment
+
+constraints: []
+
+metadata:
+  standards_bound: []
+
+# codifies — RFC-DM-001 §3.1: relação Knowledge Asset → Knowledge, N:N.
+# Esta é a fonte de verdade da relação; records/knowledge/....yaml aponta
+# de volta só por conveniência de leitura (§ nota naquele arquivo).
+codifies:
+  - knowledge_ref: "urn:framework-eng:core/workflow.release-readiness@1.0.0:knowledge:01J9K2QRSTVWXY3Z4A5B6C7D8E"
+
+content:
+  summary: >
+    Se step.deploy falhar 3 vezes (1 tentativa original + 2 retries), a
+    causa raiz historicamente está fora do controle do release. A
+    compensação automática (reversão do registro de release) é sempre
+    segura e MUST NOT ser adiada manualmente.
+  recommended_action: >
+    1. Deixar o Rollback (Execution §9) completar sem intervenção.
+    2. Só então escalar para investigação de infraestrutura do ambiente alvo.
+    3. Não reexecutar o mesmo release_id antes da causa raiz ser identificada.
+  scope_of_applicability: >
+    Aplica-se especificamente a falhas de step.deploy dentro de
+    core/workflow.release-readiness@^1.0.0. Não generaliza automaticamente a
+    outros Workflows de deployment sem nova Knowledge derivada.
+
+# Nota de certificação (não instanciada como record completo neste ciclo,
+# para não repetir um padrão já mostrado 2x — Validation & Certification §7
+# já reserva o critério para Playbook/Knowledge Asset: "checagem de
+# proveniência (`codifies` → Knowledge rastreável) + atualidade". A
+# checagem de proveniência para este Playbook é literalmente
+# Observability.provenance(this) percorrendo `codifies` até o Knowledge,
+# e deste até as duas Executions em `derives_from` — sem mecanismo novo.

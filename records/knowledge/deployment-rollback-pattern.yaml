@@ -1,0 +1,37 @@
+# Tipo de registro: Knowledge (Output Entity, Domain Model §2 #9)
+# Base normativa: Domain Model v1.1.0 §11 (Modelo de Conhecimento);
+#                  RFC-DM-001 §3.1/§3.3 (Knowledge Asset, derives_from)
+#
+# Primeiro registro de Knowledge do repositório — até este ciclo, nenhum
+# conteúdo havia exercitado a distinção que RFC-DM-001 corrigiu no achado C1
+# (Knowledge = entendimento derivado; Knowledge Asset = Component que o
+# codifica e governa).
+
+knowledge_id: "urn:framework-eng:core/workflow.release-readiness@1.0.0:knowledge:01J9K2QRSTVWXY3Z4A5B6C7D8E"
+
+# derives_from — RFC-DM-001 §3.3: fontes válidas = {Execution, Research,
+# Decision, Knowledge}, grafo acíclico e temporalmente monotônico (Kernel §7,
+# reaplicado). Aqui: duas Executions do próprio Ciclo 5 (ilustrativas —
+# nenhuma Execution real ocorreu neste repositório, mesma ressalva de
+# components/README.md e records/README.md).
+derives_from:
+  - "core/workflow.release-readiness@1.0.0:execution:01J9J8DEPLOY0000000000ATT3"   # 3ª tentativa de step.deploy, Failed
+  - "core/workflow.release-readiness@1.0.0:execution:01J9J8REVERT0000000000001"   # step.revert-deployment-record, Completed
+
+established_at: "2026-07-25T18:00:00Z"
+established_by: role.governance-area.code-quality.human-lead
+
+statement: >
+  Falhas em step.deploy que persistem após as 2 tentativas de RETRY
+  configuradas (3 Executions no total) tendem a ter causa raiz fora do
+  controle do próprio release — historicamente, infraestrutura do ambiente
+  alvo. Compensação via reversão do registro de release (step.revert-
+  deployment-record) é sempre segura de disparar automaticamente e MUST NOT
+  ser adiada por decisão manual antes da reversão ocorrer; a decisão humana
+  relevante é POSTERIOR à reversão (investigar a infraestrutura), não anterior.
+
+# codified_as — ponteiro de conveniência, NÃO é uma relação armazenada
+# separadamente; a fonte de verdade é `codifies` no Manifest do Knowledge
+# Asset abaixo (RFC-DM-001 §3.1). Mantido aqui só para navegação humana.
+codified_as:
+  - core/playbook.incident-response.deployment-rollback@1.0.0
