@@ -2,7 +2,7 @@
 
 *Atualizado em: 2026-07-25 · Branch: `claude/software-engineering-framework-fatdob`*
 
-> Este arquivo é um **ponto de controle**, não um documento arquitetural. Ele existe para que o estado do projeto sobreviva ao encerramento de qualquer sessão de conversa. Substitui integralmente a versão anterior deste checkpoint (que dizia "nenhum conteúdo real existe ainda" — isso deixou de ser verdade a partir dos ciclos de referência descritos na Seção 3).
+> Este arquivo é um **ponto de controle**, não um documento arquitetural. Ele existe para que o estado do projeto sobreviva ao encerramento de qualquer sessão de conversa. Substitui integralmente a versão anterior deste checkpoint (que dizia "nenhum conteúdo real existe ainda" — isso deixou de ser verdade a partir dos ciclos de referência descritos na Seção 3; e que dizia que o texto integral da arquitetura só existia no histórico da conversa — isso deixou de ser verdade com a persistência descrita na Seção 9).
 
 ---
 
@@ -127,8 +127,10 @@ Orchestrator (agente coordenador do ciclo completo)
 ## 8. Estrutura do repositório
 
 ```
-docs/                          arquitetura (índice — texto integral só no histórico da conversa)
+docs/
   CHECKPOINT.md                 este arquivo
+  architecture/                  texto integral dos 20 documentos ratificados (ver Seção 2)
+    01-constitution.md .. 20-packaging-distribution-architecture.md
   reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..9)
 components/                    Manifests reais de Component (Standard/Policy/Skill/Agent/Workflow/Organization/Playbook)
   core/                          namespace compartilhado
@@ -141,7 +143,9 @@ bundles/                       Bundle — codificação física de transporte (P
 
 ## 9. Ação pendente
 
-O texto integral dos 20 documentos de arquitetura existe apenas no histórico desta conversa — este checkpoint continua sendo índice/status, não o conteúdo normativo completo. Transcrição para arquivos físicos (`docs/constitution.md` etc.) permanece em aberto, sob demanda explícita.
+**Fechada.** O texto integral dos 20 documentos de arquitetura está persistido em `docs/architecture/01-*.md` a `20-*.md` — deixou de existir apenas no histórico da conversa. Standards e Policy (`12`, `13`) usam a versão ratificada v1.0.0 que substitui integralmente o rascunho do Bloco 4; Compliance Architecture não está entre os 20 por não ter sido ratificada (Seção 2, nota).
+
+Não há ação pendente conhecida de persistência. O que resta em aberto é decisão de escala ou escopo (Seção 6), não recuperação de conteúdo já produzido.
 
 ---
 
