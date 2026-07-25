@@ -1,0 +1,38 @@
+# Coordinate: core/skill.release.record-keeping
+# component_type: Skill
+# Base normativa: Skill Architecture v1.0.0
+#
+# Usada em dois papéis distintos pelo mesmo Workflow (core/workflow.release-readiness):
+#   1. kind=INVOCATION  — cria o registro formal de um release
+#   2. kind=COMPENSATION — reverte esse registro (Saga pattern, Workflow §4)
+# A Skill é a mesma; o papel é decidido inteiramente pelo Step que a invoca,
+# nunca por um campo da própria Skill (Kernel §9 — Contract declara o quê,
+# nunca o como; "como está sendo usada" é responsabilidade do Workflow).
+
+identity: core/skill.release.record-keeping
+version: 1.0.0
+component_type: Skill
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Criar ou reverter um registro formal de release.
+
+inputs:
+  - name: release_id
+    type: string
+    required: true
+  - name: action
+    type: string
+    required: true    # "create" | "revert"
+
+outputs:
+  - name: record_status
+    type: artifact/json
+
+capabilities:
+  - release.record-keeping
+
+constraints: []
+
+metadata:
+  standards_bound: []

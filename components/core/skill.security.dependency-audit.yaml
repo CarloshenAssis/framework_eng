@@ -1,0 +1,44 @@
+# Coordinate: core/skill.security.dependency-audit
+# component_type: Skill
+# Base normativa: Skill Architecture v1.0.0
+
+identity: core/skill.security.dependency-audit
+version: 1.0.0
+component_type: Skill
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Escanear as dependências declaradas de um projeto contra uma base de
+  vulnerabilidades conhecidas.
+
+inputs:
+  - name: dependency_manifest
+    type: text
+    required: true
+
+outputs:
+  - name: audit_report
+    type: artifact/json
+
+capabilities:
+  - security.dependency-audit
+
+constraints: []
+
+metadata:
+  standards_bound: []
+
+# SEM templates[] — Skill puramente funcional e determinística (Skill §5,
+# ESCOLHA DE DESIGN: templates[] é opcional). Primeira Skill do repositório
+# a exercitar esse caminho — nenhuma das anteriores era template-free.
+
+test_suite:
+  - local_id: test.detects-known-cve
+    kind: FUNCTIONAL
+    generated_by: MANUAL
+    input:
+      dependency_manifest: "left-pad@1.0.0\nevent-stream@3.3.6"
+    assertion:
+      kind: PREDICATE
+      predicate: "audit_report.vulnerabilities.any(v => v.package == 'event-stream' && v.severity == 'critical')"
+    covers: []

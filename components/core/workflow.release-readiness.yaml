@@ -1,0 +1,133 @@
+# Coordinate: core/workflow.release-readiness
+# component_type: Workflow
+# Base normativa: Workflow Architecture v1.0.0 — Parallel, Join, Retry, Compensation (Saga)
+#
+# Primeiro Workflow do repositório a exercitar paralelismo, Retry e
+# Compensação — nenhum dos ciclos anteriores tocou nesses três mecanismos.
+
+identity: core/workflow.release-readiness
+version: 1.0.0
+component_type: Workflow
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Avaliar prontidão de release combinando revisão de código e auditoria de
+  dependências em paralelo, registrar formalmente o release e executar o
+  deployment com retry automático e compensação (rollback) em caso de
+  falha definitiva.
+
+inputs:
+  - name: pull_request_diff
+    type: text
+    required: true
+  - name: dependency_manifest
+    type: text
+    required: true
+  - name: release_id
+    type: string
+    required: true
+
+outputs:
+  - name: release_outcome
+    type: artifact/json
+
+phases:
+  - id: phase.parallel-checks
+    steps:
+      - id: step.run-code-review
+        kind: INVOCATION
+        slot:
+          required_capability: static-analysis.code-review
+          pinned_coordinate: core/skill.static-analysis.code-review@1.0.0
+          version_range: "^1.0.0"
+          min_certification_level: L2
+          cardinality: EXACTLY_ONE
+        failure_policy: { on_failure: ABORT }
+      - id: step.run-dependency-audit
+        kind: INVOCATION
+        slot:
+          required_capability: security.dependency-audit
+          version_range: "^1.0.0"
+          min_certification_level: L1     # não certificada além de L1 ainda — ver walkthrough §3
+          cardinality: EXACTLY_ONE
+        failure_policy: { on_failure: ABORT }
+    # NENHUMA dependência declarada entre os dois Steps acima → despacho
+    # concorrente por padrão (Execution §10, regra EX3: "Steps sem
+    # dependência topológica MUST despachar em paralelo"). Não existe campo
+    # "parallel: true" — ausência de precedência já É a semântica.
+    next: [phase.readiness-gate]
+
+  - id: phase.readiness-gate
+    # Join IMPLÍCITO: o Scheduler só avalia este Decision Point quando AMBOS
+    # os Steps de phase.parallel-checks estão em estado terminal — nenhuma
+    # Phase de "Join" separada e vazia é necessária (Execution §9).
+    steps: []
+    next:
+      - target: phase.create-record
+        condition: >
+          !code_review.findings.any(f => f.severity == 'blocker') &&
+          !dependency_audit.vulnerabilities.any(v => v.severity == 'critical')
+      - target: phase.rejected
+        condition: >
+          code_review.findings.any(f => f.severity == 'blocker') ||
+          dependency_audit.vulnerabilities.any(v => v.severity == 'critical')
+
+  - id: phase.create-record
+    steps:
+      - id: step.create-deployment-record
+        kind: INVOCATION
+        compensated_by: step.revert-deployment-record    # Saga pattern — Workflow §4
+        slot:
+          required_capability: release.record-keeping
+          pinned_coordinate: core/skill.release.record-keeping@1.0.0
+          version_range: "^1.0.0"
+          min_certification_level: L1
+          cardinality: EXACTLY_ONE
+        failure_policy: { on_failure: ABORT }
+    next: [phase.deploy]
+
+  - id: phase.deploy
+    steps:
+      - id: step.deploy
+        kind: INVOCATION
+        slot:
+          required_capability: release.deploy
+          pinned_coordinate: core/skill.release.deploy@1.0.0
+          version_range: "^1.0.0"
+          min_certification_level: L1
+          cardinality: EXACTLY_ONE
+        failure_policy: { on_failure: RETRY, retry_count: 2 }
+        # Domain Model §8: "nova tentativa é uma nova Execution" — até 3
+        # Executions no total (1 original + 2 retries). Se a 3ª ainda falhar,
+        # o Step é Failed definitivamente. Nenhum compensated_by está
+        # declarado NESTE Step — o Rollback (Execution §9) volta às Phases
+        # já concluídas e dispara o compensated_by delas: aqui,
+        # step.revert-deployment-record.
+    next: [phase.completed]
+
+  - id: phase.completed
+    steps: []
+    next: []
+
+  - id: phase.rejected
+    steps: []
+    next: []
+
+  # Alcançada SOMENTE pelo algoritmo Rollback (Execution §9), nunca por um
+  # `next` declarado na topologia normal — não é um destino de Branch, é o
+  # container estrutural do Compensation Step disparado fora do fluxo
+  # principal.
+  - id: phase.revert
+    steps:
+      - id: step.revert-deployment-record
+        kind: COMPENSATION
+        slot:
+          required_capability: release.record-keeping
+          pinned_coordinate: core/skill.release.record-keeping@1.0.0
+          version_range: "^1.0.0"
+          min_certification_level: L1
+          cardinality: EXACTLY_ONE
+        failure_policy: { on_failure: ABORT }   # Workflow §4, WF4 — Compensation Step
+                                                  # MUST ter failure_policy=ABORT (evita
+                                                  # recursão de "compensação da compensação")
+    next: []

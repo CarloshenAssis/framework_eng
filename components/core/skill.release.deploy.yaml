@@ -1,0 +1,28 @@
+# Coordinate: core/skill.release.deploy
+# component_type: Skill
+# Base normativa: Skill Architecture v1.0.0
+
+identity: core/skill.release.deploy
+version: 1.0.0
+component_type: Skill
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Realizar o deployment efetivo de um release para o ambiente de produção.
+
+inputs:
+  - name: release_id
+    type: string
+    required: true
+
+outputs:
+  - name: deploy_status
+    type: artifact/json
+
+capabilities:
+  - release.deploy
+
+constraints: []
+
+metadata:
+  standards_bound: []
