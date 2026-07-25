@@ -1,0 +1,58 @@
+# Subject: core/skill.static-analysis.code-review@1.0.0
+# Tipo de registro: Value Object, ComplianceDrift (Compliance Architecture §4.6)
+#
+# DetectDrift(report_a, report_b) sobre os dois ComplianceReport já produzidos
+# no Ciclo 10 — nenhuma Execution nova, nenhum Assessment novo. Drift é
+# puramente uma comparação entre dois Reports imutáveis já existentes
+# (Compliance §4.6, §5 `detect_drift`). Primeira instância real de Compliance
+# Drift no piloto.
+
+drift:
+  subject: core/skill.static-analysis.code-review@1.0.0
+  report_a_ref: "records/compliance/wf-01j-static-review.assessment.yaml"     # evaluated_at 09:15:00Z
+  report_b_ref: "records/compliance/extended-pilot.assessment.yaml"           # evaluated_at 17:30:00Z
+  computed_at: "2026-07-25T18:00:00Z"
+
+  subject_drift: null
+  # report_a.subject.version == report_b.subject.version == 1.0.0 — o Component
+  # não mudou de versão entre os dois instantes.
+
+  normative_drift: null
+  # Mesmo Standard referenciado nos dois Reports (core/standard.code-quality.
+  # review-baseline@1.0.0). standards_lineage(report_a) == standards_lineage(
+  # report_b) — o Standard EM SI não mudou de versão; apenas o NÍVEL que uma
+  # Policy vincula dele mudou. Isso é Applicability drift (abaixo), não
+  # Normative drift — a distinção exata que Compliance §4.6 traça entre "a
+  # norma evoluiu" e "a Policy passou a exigir mais da mesma norma".
+
+  applicability_drift:
+    cause: EFFECTIVE_POLICY_SET_CHANGED
+    report_a_eps_ref: "eps-01J8Y1RQ0G2H4J6KVKX7ZC1PWN"
+    report_b_eps_ref: "eps-01J8Y3F90N4P6RVXMY9AD3SXA0"
+    diff:
+      policy_bindings_removed:
+        - standard: core/standard.code-quality.review-baseline@1.0.0
+          level: BASE
+          conformance_mode: STRICT
+          origin: "POLICY(core/policy.code-quality.mandatory-review@1.0.0)"
+      policy_bindings_added:
+        - standard: core/standard.code-quality.review-baseline@1.0.0
+          level: EXTENDED
+          conformance_mode: PARTIAL_ACCEPTABLE
+          origin: "POLICY(core/policy.code-quality.extended-pilot@1.0.0)"
+      root_cause: >
+        core/policy.code-quality.extended-pilot@1.0.0 entrou em vigência
+        (effective_from=2026-07-25T17:00:00Z) entre os dois Assessments e
+        suprimiu core/policy.code-quality.mandatory-review@1.0.0 via
+        `overrides` (Policy §7.3) — nenhum Standard mudou de versão; a
+        Policy vigente é que mudou.
+
+# Compliance §4.6: "delta classificado por causa, sem juízo de valor" — este
+# registro NÃO afirma que o drift é um problema. Neste caso específico não é:
+# a mudança foi um piloto institucional deliberado (ver purpose em
+# components/core/policy.code-quality.extended-pilot.yaml), não uma norma
+# mudando por trás das costas de ninguém — o cenário que Governance §13
+# mandata tratar ativamente é justamente o oposto deste (Normative drift não
+# planejado). A resposta institucional a QUALQUER drift, planejado ou não,
+# permanece exclusivamente de Governance §13 — Compliance apenas o descreve.
+descriptive_only: true
