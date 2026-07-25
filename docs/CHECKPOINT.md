@@ -8,7 +8,7 @@
 
 ## 1. Onde estamos
 
-A infraestrutura institucional está **completa**: 20 documentos de arquitetura ratificados, do Constitution ao Packaging & Distribution, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, já existem **9 ciclos de referência** de conteúdo real (Standards, Policies, Skills, Agent, Workflows, Organization, records de Certificação/RoleAssignment/Knowledge) — um piloto pequeno e deliberado, não uma biblioteca em volume, cujo objetivo foi validar cada peça da arquitetura sobre dado concreto antes de qualquer geração em escala.
+A infraestrutura institucional está **completa**: 21 documentos de arquitetura ratificados, do Constitution ao Compliance Architecture, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, já existem **9 ciclos de referência** de conteúdo real (Standards, Policies, Skills, Agent, Workflows, Organization, records de Certificação/RoleAssignment/Knowledge) — um piloto pequeno e deliberado, não uma biblioteca em volume, cujo objetivo foi validar cada peça da arquitetura sobre dado concreto antes de qualquer geração em escala.
 
 Analogia atualizada: o sistema operacional está completo e **um programa de referência já roda nele**, ponta a ponta, com falhas e recuperação reais — mas a "loja de aplicativos" (biblioteca ampla de Standards/Skills/Agents/Workflows) ainda não existe.
 
@@ -38,10 +38,11 @@ Analogia atualizada: o sistema operacional está completo e **um programa de ref
 | 18 | Organization & Tenancy Architecture v1.0.0 | Organization como Component, Membership, isolamento |
 | 19 | Testing Architecture v1.0.0 | Test Case, Test Run Report, Cobertura, Regressão |
 | 20 | Packaging & Distribution Architecture v1.0.0 | Bundle, integridade em trânsito, exportação de métricas |
+| 21 | Compliance Architecture v1.0.0 | Compliance Assessment, Conformance Claim, Binding Satisfaction, Drift, Waiver/Risk Acceptance |
 
-**Nota:** um rascunho de *Compliance Architecture* foi produzido no Bloco 4, mas **não foi ratificado** — permanece consumidor downstream, não congelado.
+**Nota:** o rascunho de *Compliance Architecture* produzido no Bloco 4 foi **ratificado** nesta sessão como documento 21, após validação contra os sete documentos ratificados depois dele (Template, Skill, Observability, Agent, Organization & Tenancy, Testing, Packaging & Distribution) e contra a versão final de Standards/Policy. A validação encontrou e fechou uma lacuna real: `PolicyBinding.conformance_mode` não existia quando o rascunho foi escrito, e a versão ratificada introduz `Binding Satisfaction` (§4.4) para determinar corretamente se uma Partial Conformance satisfaz um Binding `STRICT`. Ver `docs/architecture/21-compliance-architecture.md`.
 
-**Nenhuma RFC além de RFC-DM-001** foi necessária em dezenove documentos consecutivos de arquitetura — todos comprovaram formalmente, cada um, que a base é suficientemente expressiva.
+**Nenhuma RFC além de RFC-DM-001** foi necessária em vinte documentos consecutivos de arquitetura — todos comprovaram formalmente, cada um, que a base é suficientemente expressiva.
 
 ---
 
@@ -80,27 +81,26 @@ Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execu
 ## 5. O que ainda NÃO existe
 
 - Biblioteca ampla de Standards/Skills/Agents/Workflows (o piloto tem ~6 Skills, 1 Agent, 5 Workflows, 5 Standards — não dezenas)
-- `Compliance Architecture` ratificada
-- `Standard Package` (`standard_kind: PACKAGE`) instanciado em conteúdo — único mecanismo nomeado de arquitetura ainda sem exemplo real
+- Conteúdo real exercitando `Compliance Architecture` (Compliance Assessment, Conformance Claim, Binding Satisfaction) — documento ratificado (§2), mas sem ciclo de referência próprio ainda
 - Query real de `Observability` (trace/provenance) mostrada como saída literal de uma consulta, não só narrada em prosa
 - Terceiro domínio de conteúdo (os dois existentes são code-quality/release e documentação de API)
 
-**Fechado no Ciclo 9:** `Standard Package` (`standard_kind: PACKAGE`) — era a única peça nomeada de arquitetura sem exemplo real. Com isso, **não há mais lacuna de cobertura de mecanismo conhecida** no piloto — o que resta em aberto é decisão de escala (biblioteca em volume) ou de escopo (terceiro domínio, ratificação de Compliance), não validação.
+**Fechado no Ciclo 9:** `Standard Package` (`standard_kind: PACKAGE`) — era a única peça nomeada de arquitetura sem exemplo real, entre os 20 documentos daquele momento. **Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21 (§2) — não há mais documento de arquitetura em estado de rascunho não ratificado. O que resta em aberto é decisão de escala (biblioteca em volume) ou de escopo (terceiro domínio, ciclo de conteúdo para Compliance), não validação arquitetural.
 
 ---
 
 ## 6. Roadmap
 
 ```
-[RATIFICADO — infraestrutura completa, 20 documentos]
-Constitution → ... → Agent → Organization & Tenancy → Testing → Packaging & Distribution
+[RATIFICADO — infraestrutura completa, 21 documentos]
+Constitution → ... → Testing → Packaging & Distribution → Compliance Architecture
 
-[CONCLUÍDO — piloto de conteúdo, 9 ciclos — todo mecanismo nomeado exercitado]
+[CONCLUÍDO — piloto de conteúdo, 9 ciclos — todo mecanismo nomeado exercitado nos 20 primeiros documentos]
 Reference Cycle 1-9 (components/, records/, bundles/)
 
 [CANDIDATOS PARA CONTINUAÇÃO FUTURA — sem ordem obrigatória, nenhum bloqueante]
 - Terceiro domínio de conteúdo
-- Compliance Architecture (se decidido ratificar)
+- Décimo ciclo de referência, exercitando Compliance Architecture (Assessment, Conformance Claim, Binding Satisfaction)
 
 [DEPOIS — biblioteca em volume, só após decisão explícita de escalar]
 Standards/Skills/Templates/Agents/Workflows reais em quantidade
@@ -119,6 +119,7 @@ Orchestrator (agente coordenador do ciclo completo)
 | Modelo interno de Organization (billing, quotas) | Identity §10 | Deliberadamente deferida — `Resource & Quota Architecture` futura |
 | Separação de funções, Role ocupado por Agent (caso geral) | Achado H2 | ✅ Fechada — Agent Architecture §7 (AG4/AG5) |
 | Evidence para `EvaluationMethod=DYNAMIC` em escala | Standards §19 | ✅ Fechada — Testing Architecture |
+| Mecanismo de verificação contínua de conformidade (Compliance) | Governance §13 | ✅ Fechada — Compliance Architecture (documento 21) |
 
 **Risco psicológico** (mantido da versão anterior deste checkpoint, ainda vigente): tendência de introduzir conceitos que "parecem úteis" sem necessidade real. A disciplina de reuso — inclusive durante a instanciação de conteúdo, onde dois erros reais foram corrigidos em vez de mascarados — continua sendo o ativo mais valioso do projeto.
 
@@ -129,8 +130,8 @@ Orchestrator (agente coordenador do ciclo completo)
 ```
 docs/
   CHECKPOINT.md                 este arquivo
-  architecture/                  texto integral dos 20 documentos ratificados (ver Seção 2)
-    01-constitution.md .. 20-packaging-distribution-architecture.md
+  architecture/                  texto integral dos 21 documentos ratificados (ver Seção 2)
+    01-constitution.md .. 21-compliance-architecture.md
   reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..9)
 components/                    Manifests reais de Component (Standard/Policy/Skill/Agent/Workflow/Organization/Playbook)
   core/                          namespace compartilhado
@@ -143,7 +144,7 @@ bundles/                       Bundle — codificação física de transporte (P
 
 ## 9. Ação pendente
 
-**Fechada.** O texto integral dos 20 documentos de arquitetura está persistido em `docs/architecture/01-*.md` a `20-*.md` — deixou de existir apenas no histórico da conversa. Standards e Policy (`12`, `13`) usam a versão ratificada v1.0.0 que substitui integralmente o rascunho do Bloco 4; Compliance Architecture não está entre os 20 por não ter sido ratificada (Seção 2, nota).
+**Fechada.** O texto integral dos 21 documentos de arquitetura está persistido em `docs/architecture/01-*.md` a `21-*.md` — deixou de existir apenas no histórico da conversa. Standards e Policy (`12`, `13`) usam a versão ratificada v1.0.0 que substitui integralmente o rascunho do Bloco 4; Compliance Architecture (`21`) foi ratificada nesta sessão, validada contra a base completa (Seção 2, nota).
 
 Não há ação pendente conhecida de persistência. O que resta em aberto é decisão de escala ou escopo (Seção 6), não recuperação de conteúdo já produzido.
 
