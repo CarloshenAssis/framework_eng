@@ -1,0 +1,48 @@
+# Bundle — Packaging & Distribution Architecture v1.0.0
+# NÃO é uma entidade do Domain Model, NÃO é um Component — codificação
+# física e portátil de Manifests já existentes e imutáveis (§1.2).
+#
+# Produzido por:
+#   export_bundle(subject=core/workflow.pull-request-review@1.0.0,
+#                 include_dependency_closure=true,
+#                 include_certification_evidence=true)
+#
+# Fecho de dependências (Composition §5) resolvido a partir dos
+# `pinned_coordinate` já declarados nos Steps do Workflow — não é um
+# fecho arbitrário, é exatamente o que o Workflow, para funcionar, precisa
+# ter disponível no deployment receptor.
+
+bundle_format_version: 1.0.0
+primary_subject: core/workflow.pull-request-review@1.0.0
+exported_at: "2026-07-26T09:00:00Z"
+exported_by: role.governance-area.code-quality.steward
+
+manifests:
+  - coordinate: core/workflow.pull-request-review@1.0.0
+    source_file: "components/core/workflow.pull-request-review.yaml"
+    manifest_digest: "sha256:9f2a4b7e1c3d5f608a2b4c6e8f0a1b3c5d7e9f0a1b2c3d4e5f6a7b8c9d0e1f2a"
+
+  - coordinate: core/skill.static-analysis.code-review@1.0.0
+    source_file: "components/core/skill.static-analysis.code-review.yaml"
+    manifest_digest: "sha256:3c1e5a7b9d0f2c4e6a8b0d2f4c6e8a0b2d4f6a8c0e2b4d6f8a0c2e4b6d8f0a2c"
+
+  - coordinate: core/agent.code-reviewer@1.0.0
+    source_file: "components/core/agent.code-reviewer.yaml"
+    manifest_digest: "sha256:7d0f2b4e6a8c0d2f4b6e8a0c2d4f6b8e0a2c4d6f8b0e2a4c6d8f0b2e4a6c8d0f"
+
+certification_evidence:                # PK4 — advisória, NUNCA vinculante no receptor
+  - subject: core/skill.static-analysis.code-review@1.0.0
+    decision_record_ref: "records/certification/core.skill.static-analysis.code-review.yaml#L4"
+  - subject: core/agent.code-reviewer@1.0.0
+    decision_record_ref: "records/certification/core.agent.code-reviewer.yaml#L4"
+
+# NÃO incluído por desenho (Packaging §6.3/§9) — Standards e Policies
+# vinculados não são Providers resolvidos por Composition Slot, portanto
+# não fazem parte do fecho de dependências. Um deployment receptor PRECISA
+# deles para que o Workflow funcione, mas precisa exportá-los/importá-los
+# como Bundles próprios, separadamente. Ver walkthrough §3 para a
+# consequência prática de esquecer isso.
+not_included_by_design:
+  - core/standard.code-quality.review-baseline@1.0.0
+  - core/standard.governance.agent-decision-integrity@1.0.0
+  - core/policy.code-quality.mandatory-review@1.0.0
