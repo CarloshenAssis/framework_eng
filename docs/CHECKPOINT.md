@@ -8,7 +8,7 @@
 
 ## 1. Onde estamos
 
-A infraestrutura institucional está **completa**: 21 documentos de arquitetura ratificados (Compliance Architecture em v1.1.0 — ver nota da Seção 2), do Constitution ao Compliance Architecture, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, já existem **11 ciclos de referência** de conteúdo real (Standards, Policies, Skills, Agent, Workflows, Organization, records de Certificação/RoleAssignment/Knowledge/Compliance) — um piloto pequeno e deliberado, não uma biblioteca em volume, cujo objetivo foi validar cada peça da arquitetura sobre dado concreto antes de qualquer geração em escala.
+A infraestrutura institucional está **completa**: 21 documentos de arquitetura ratificados (Compliance Architecture em v1.1.0 — ver nota da Seção 2), do Constitution ao Compliance Architecture, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, já existem **12 ciclos de referência** de conteúdo real (Standards, Policies, Skills, Agent, Workflows, Organization, records de Certificação/RoleAssignment/Knowledge/Compliance, consultas literais de Observability) — um piloto pequeno e deliberado, não uma biblioteca em volume, cujo objetivo foi validar cada peça da arquitetura sobre dado concreto antes de qualquer geração em escala.
 
 Analogia atualizada: o sistema operacional está completo e **um programa de referência já roda nele**, ponta a ponta, com falhas e recuperação reais — mas a "loja de aplicativos" (biblioteca ampla de Standards/Skills/Agents/Workflows) ainda não existe.
 
@@ -48,7 +48,7 @@ Uma segunda lacuna, menor, foi encontrada logo em seguida ao tentar instanciar R
 
 ---
 
-## 3. Conteúdo real — 11 ciclos de referência
+## 3. Conteúdo real — 12 ciclos de referência
 
 Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualquer coisa deve existir), o conteúdo abaixo é **instância real**, em `components/`, `records/` e `bundles/`.
 
@@ -65,30 +65,32 @@ Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualqu
 | 9 | `Standard Package` (`standard_kind: PACKAGE`) agregando os dois Standards de `core/` via `includes` | Fecha o último mecanismo nomeado de arquitetura sem exemplo real (dos 20 documentos daquele momento) |
 | 10 | `Compliance Assessment` real (RUNTIME) formalizando o dispatch do Ciclo 1; nova Policy `extended-pilot` (nível EXTENDED, `conformance_mode: PARTIAL_ACCEPTABLE`, `overrides`); `ConformanceClaim{PARTIAL}` real; `BindingSatisfaction` nos três ramos (`CLAIM_STRICT`, `CLAIM_PARTIAL_ACCEPTED`, `CLAIM_PARTIAL_REJECTED`); Waiver de Binding | Fecha o 21º documento (Compliance Architecture) sem nenhum conteúdo até então; exercita com dado real a lacuna encontrada e corrigida durante a ratificação (`conformance_mode` determinando satisfação de Binding) |
 | 11 | `Compliance Drift` real (`detect_drift` sobre os dois Reports do Ciclo 10, sem nova Execution); primeira Non-Conformance genuína do piloto; primeira `Risk Acceptance` real (nível NR, com `risk_classification`) | Fecha as duas últimas peças nomeadas de Compliance Architecture sem exemplo real; expôs e motivou a emenda v1.1.0 (Waiver/Risk Acceptance de nível NR propagando para `BindingSatisfaction` no caso Non-Conformance) |
+| 12 | Saída literal de `trace()`, `provenance()` e `query_events()` (Observability Query Service, §7.1) sobre dado já produzido nos Ciclos 10-11 — nenhum `components/`/`records/` novo, de propósito (OB2 proíbe persistir Trace/Span/Provenance Chain) | Fecha a última lacuna registrada que não era mecanismo sem exemplo, mas consulta narrada em vez de mostrada; `provenance()` liga mecanicamente a Evidence do Ciclo 11 à Risk Acceptance que a resolveu |
 
 Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execution real foi processada por um runtime — os ciclos são ilustrativos, mostrando a forma exata que os artefatos assumiriam.
 
-**Marco atingido no Ciclo 9** (temporariamente reaberto pela ratificação de Compliance como 21º documento, fechado de novo pelo Ciclo 10, refinado pelo Ciclo 11): todos os 21 documentos e todo mecanismo nomeado de arquitetura ratificados têm, agora, pelo menos um exemplo real exercitando-os — incluindo Drift e Risk Acceptance, as duas últimas peças de Compliance Architecture ainda em prosa depois do Ciclo 10. Ver `docs/reference-cycle-10-walkthrough.md` e `docs/reference-cycle-11-walkthrough.md`.
+**Marco atingido no Ciclo 9** (temporariamente reaberto pela ratificação de Compliance como 21º documento, fechado de novo pelo Ciclo 10, refinado pelo Ciclo 11): todos os 21 documentos e todo mecanismo nomeado de arquitetura ratificados têm, agora, pelo menos um exemplo real exercitando-os — incluindo Drift e Risk Acceptance, as duas últimas peças de Compliance Architecture ainda em prosa depois do Ciclo 10. O Ciclo 12 fecha uma lacuna de natureza diferente: não um mecanismo sem exemplo, mas uma consulta (`Observability Query Service`) sempre narrada, nunca mostrada como dado literal. Ver `docs/reference-cycle-10-walkthrough.md` a `docs/reference-cycle-12-walkthrough.md`.
 
 ---
 
 ## 4. Princípios estruturais provados
 
-- **Zero inflação de entidade** em 21 documentos de arquitetura + 11 ciclos de conteúdo.
+- **Zero inflação de entidade** em 21 documentos de arquitetura + 12 ciclos de conteúdo.
 - **Reuso em vez de criação**: *cycle detection* (Kernel §7) reaplicado 6+ vezes; padrão "Value Object escopado a Contract" usado por Capability/Phase/Step/NormativeRequirement/PolicyBinding/Template/TestCase; padrão "família nomeada de Decision" usado por CertificationGrant/RoleAssignment/Waiver/Risk Acceptance; os dois caminhos de vinculação normativa (Policy derivada vs. `standards_bound` local) comprovadamente intercambiáveis, não um substituindo o outro por acidente — inclusive quando entram em níveis diferentes e precisam de união não trivial (Ciclo 10).
 - **Correção sem reescrita silenciosa**: erros reais foram encontrados durante a instanciação de conteúdo (nome de fase prometendo garantia inexistente; ordem AG2 violada) e, duas vezes, durante a própria ratificação/instanciação de Compliance Architecture na mesma sessão (`conformance_mode` ausente do rascunho; depois, Waiver/Risk Acceptance de nível NR sem efeito sobre Binding) — todos corrigidos com nota explicando o quê, por quê, quando, nunca apagados.
 - **Fronteiras arquiteturais expostas, não escondidas**: o Ciclo 8 mostra deliberadamente o que acontece quando alguém ignora uma fronteira documentada (fecho de Composition ≠ vinculação normativa) em vez de fingir que o problema não existe.
-- **Nenhuma RFC adicional** foi necessária em nenhum momento, nem durante a arquitetura, nem durante os 11 ciclos de conteúdo — a única emenda em qualquer documento ratificado, em toda a sessão, foi a v1.1.0 de Compliance, MINOR e puramente aditiva.
+- **Nenhuma RFC adicional** foi necessária em nenhum momento, nem durante a arquitetura, nem durante os 12 ciclos de conteúdo — a única emenda em qualquer documento ratificado, em toda a sessão, foi a v1.1.0 de Compliance, MINOR e puramente aditiva.
+- **Regras normativas aplicadas até na forma dos próprios registros do piloto**: o Ciclo 12 deliberadamente não criou nenhum arquivo em `records/` porque OB2 (Observability) proíbe persistir exatamente o tipo de dado que ele produz — a disciplina de reuso/não-invenção vale também para onde e como este piloto guarda o que produz, não só para o conteúdo técnico.
 
 ---
 
 ## 5. O que ainda NÃO existe
 
 - Biblioteca ampla de Standards/Skills/Agents/Workflows (o piloto tem ~6 Skills, 1 Agent, 5 Workflows, 6 Standards, 4 Policies — não dezenas)
-- Query real de `Observability` (trace/provenance) mostrada como saída literal de uma consulta, não só narrada em prosa
 - Terceiro domínio de conteúdo (os dois existentes são code-quality/release e documentação de API)
+- `debug()`, `replay()`, `export_metrics()` — as três operações do Observability Query Service que o Ciclo 12 não exercitou (focou em `trace`/`provenance`/`query_events`, as três formas estruturalmente distintas de consulta)
 
-**Fechado no Ciclo 9:** `Standard Package` — última peça nomeada de arquitetura sem exemplo real, entre os 20 documentos daquele momento. **Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21; Ciclo 10 (Assessment, Conformance Claim, Binding Satisfaction, Waiver de Binding); emenda v1.1.0 (Waiver/Risk Acceptance de nível NR); Ciclo 11 (Drift, Risk Acceptance). Não há mais documento de arquitetura em estado de rascunho não ratificado, nem mecanismo nomeado de nenhum dos 21 documentos sem exemplo real. O que resta em aberto é decisão de escala (biblioteca em volume) ou de escopo (terceiro domínio de conteúdo, query literal de Observability), não validação arquitetural de nenhum mecanismo central.
+**Fechado no Ciclo 9:** `Standard Package` — última peça nomeada de arquitetura sem exemplo real, entre os 20 documentos daquele momento. **Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21; Ciclo 10 (Assessment, Conformance Claim, Binding Satisfaction, Waiver de Binding); emenda v1.1.0 (Waiver/Risk Acceptance de nível NR); Ciclo 11 (Drift, Risk Acceptance); Ciclo 12 (`trace`/`provenance`/`query_events` como saída literal). Não há mais documento de arquitetura em estado de rascunho não ratificado, nem mecanismo nomeado de nenhum dos 21 documentos sem exemplo real, nem consulta central de Observability apenas narrada. O que resta em aberto é decisão de escala (biblioteca em volume) ou de escopo (terceiro domínio de conteúdo, as três operações remanescentes de Observability), não validação arquitetural de nenhum mecanismo central.
 
 ---
 
@@ -98,12 +100,13 @@ Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execu
 [RATIFICADO — infraestrutura completa, 21 documentos]
 Constitution → ... → Testing → Packaging & Distribution → Compliance Architecture (v1.1.0)
 
-[CONCLUÍDO — piloto de conteúdo, 11 ciclos — todo mecanismo nomeado exercitado nos 21 documentos]
-Reference Cycle 1-11 (components/, records/, bundles/)
+[CONCLUÍDO — piloto de conteúdo, 12 ciclos — todo mecanismo nomeado exercitado nos 21 documentos,
+ e as três formas centrais de consulta de Observability mostradas como saída literal]
+Reference Cycle 1-12 (components/, records/, bundles/, docs/reference-cycle-12-walkthrough.md)
 
 [CANDIDATOS PARA CONTINUAÇÃO FUTURA — sem ordem obrigatória, nenhum bloqueante]
 - Terceiro domínio de conteúdo
-- Query real de Observability mostrada como saída literal (trace/query_events)
+- `debug()`/`replay()`/`export_metrics()` — operações de Observability ainda não mostradas como saída literal
 
 [DEPOIS — biblioteca em volume, só após decisão explícita de escalar]
 Standards/Skills/Templates/Agents/Workflows reais em quantidade
@@ -135,7 +138,7 @@ docs/
   CHECKPOINT.md                 este arquivo
   architecture/                  texto integral dos 21 documentos ratificados (ver Seção 2)
     01-constitution.md .. 21-compliance-architecture.md
-  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..11)
+  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..12)
 components/                    Manifests reais de Component (Standard/Policy/Skill/Agent/Workflow/Organization/Playbook)
   core/                          namespace compartilhado
   org.acme-corp/                 namespace de tenant, filho de core/
