@@ -1,0 +1,173 @@
+# Workflow: emprestimo
+# Framework Eng — Workflow Architecture v1.0.0
+
+apiVersion: framework.eng/v1
+kind: Workflow
+metadata:
+  name: wf-emprestimo
+  namespace: ortho-crm
+  version: 1.0.0
+  labels:
+    domain: assistencia-social
+    trigger: human
+    compliance-level: L2
+
+spec:
+  description: >
+    Workflow formal de 5 fases para registro de empréstimo de equipamento
+    ortopédico, com evidência fotográfica, checklist e assinatura.
+
+  goal: contento_de_contexto  # Agent Architecture v1.0.0
+  action: Step_reutilizado    # Cada Step é uma ação reutilizável
+
+  phases:
+    - id: identificacao
+      name: Identificação do Beneficiário
+      gate: GATE_AUTO
+      steps:
+        - id: s1.1
+          name: buscar_beneficiario
+          slot: beneficiario_id
+          kind: HUMAN_INPUT
+          params:
+            binding_source: PARAMETER
+            search_fields: [cpf, nome, telefone]
+          failure_policy: RETRY
+          retry_count: 3
+          timeout: 300  # segundos
+
+        - id: s1.2
+          name: validar_beneficiario
+          slot: validacao_beneficiario
+          kind: SYSTEM
+          validation:
+            - rule: cpf_valido
+            - rule: sem_atrasos_pendentes
+            - rule: documentos_completos
+          failure_policy: HALT
+          on_failure: "Beneficiário não pode realizar empréstimo"
+
+    - id: selecao
+      name: Seleção do Equipamento
+      gate: GATE_AUTO
+      steps:
+        - id: s2.1
+          name: buscar_equipamento
+          slot: equipamento_id
+          kind: HUMAN_INPUT
+          params:
+            binding_source: PARAMETER
+            filter: "status = 'Disponível'"
+
+        - id: s2.2
+          name: reservar_equipamento
+          slot: reserva
+          kind: SYSTEM
+          action: UPDATE equipamento.status = 'Reservado'
+          compensation:
+            action: UPDATE equipamento.status = 'Disponível'
+            trigger: on_workflow_failure
+
+    - id: configuracao
+      name: Configuração do Prazo
+      gate: GATE_AUTO
+      steps:
+        - id: s3.1
+          name: definir_prazo
+          slot: prazo_dias
+          kind: HUMAN_INPUT
+          params:
+            binding_source: PARAMETER
+            options: [30, 60, 90, 'Personalizado']
+
+        - id: s3.2
+          name: calcular_vencimento
+          slot: data_prevista_devolucao
+          kind: SYSTEM
+          action: "data_emprestimo + prazo_dias"
+
+    - id: evidencia
+      name: Evidência e Checklist
+      gate: GATE_AUTO
+      steps:
+        - id: s4.1
+          name: checklist_entrega
+          slot: checklist_entrega
+          kind: HUMAN_INPUT
+          params:
+            binding_source: PARAMETER
+            items:
+              - id: rodas
+                label: Rodas em bom estado
+              - id: freios
+                label: Freios funcionando
+              - id: apoio_braco
+                label: Apoio de braço intacto
+              - id: apoio_pe
+                label: Apoio de pé intacto
+              - id: ferrugem
+                label: Sem ferrugem
+              - id: higienizado
+                label: Equipamento higienizado
+
+        - id: s4.2
+          name: fotos_entrega
+          slot: fotos_entrega
+          kind: HUMAN_INPUT
+          validation:
+            - rule: minimo_2_fotos
+            - rule: formato_jpeg_ou_png
+
+        - id: s4.3
+          name: assinatura_termo
+          slot: assinatura
+          kind: HUMAN_INPUT
+          options: [digital, foto_termo]
+
+    - id: confirmacao
+      name: Confirmação e Registro
+      gate: GATE_APPROVAL
+      steps:
+        - id: s5.1
+          name: revisar_dados
+          slot: revisao
+          kind: HUMAN_INPUT
+          display:
+            - field: beneficiario.nome
+            - field: equipamento.codigo
+            - field: emprestimo.prazo_dias
+            - field: emprestimo.data_prevista_devolucao
+            - field: checklist_entrega
+
+        - id: s5.2
+          name: confirmar_emprestimo
+          slot: confirmacao
+          kind: SYSTEM
+          actions:
+            - INSERT Emprestimo
+            - UPDATE Equipamento.status = 'Emprestado'
+            - INSERT Notificacao (tipo: Confirmacao)
+            - DISPATCH Skill: gestao-emprestimo / cap-notificar-beneficiario
+
+        - id: s5.3
+          name: gerar_evidencia
+          slot: artifact
+          kind: SYSTEM
+          action: GENERATE Context Snapshot (RFC-DM-001 C2)
+          output:
+            artifact_type: ExecutionEvidence
+            provenance_chain: true
+
+  failure_policies:
+    default: ROLLBACK
+    phase_specific:
+      - phase: identificacao
+        policy: HALT
+      - phase: confirmacao
+        policy: ROLLBACK
+        compensation_steps: [s2.2, s5.2]
+
+  timeline:
+    enabled: true
+    trace_level: FULL
+    retention: 7_years  # conforme LAI

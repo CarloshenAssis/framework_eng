@@ -1,0 +1,145 @@
+# Skill: gestao-emprestimo
+# Framework Eng — Skill Architecture v1.0.0
+# Operational Component puro
+
+apiVersion: framework.eng/v1
+kind: Skill
+metadata:
+  name: gestao-emprestimo
+  namespace: ortho-crm
+  version: 1.0.0
+  labels:
+    domain: assistencia-social
+    sub-domain: equipamentos-ortopedicos
+    compliance-level: L2
+
+spec:
+  description: >
+    Orquestra o ciclo completo de empréstimo de equipamentos ortopédicos:
+    identificação do beneficiário, seleção do equipamento, evidência
+    fotográfica, assinatura do termo e notificação automática.
+
+  capabilities:
+    - id: cap-identificar-beneficiario
+      description: Buscar e validar beneficiário por CPF, nome ou telefone
+      input: { cpf: string?, nome: string?, telefone: string? }
+      output: { beneficiario: Beneficiario, valido: bool, bloqueios: string[] }
+
+    - id: cap-selecionar-equipamento
+      description: Listar equipamentos disponíveis por tipo
+      input: { tipo: string?, busca: string? }
+      output: { equipamentos: Equipamento[], total: int }
+
+    - id: cap-reservar-equipamento
+      description: Reservar equipamento para evitar duplo empréstimo
+      input: { equipamento_id: ULID, reservar_por_minutos: int }
+      output: { reserva_id: ULID, expira_em: datetime }
+
+    - id: cap-registrar-checklist
+      description: Registrar checklist de estado do equipamento
+      input: { emprestimo_id: ULID, checklist: Checklist, fotos: Foto[] }
+      output: { checklist_id: ULID, completo: bool }
+
+    - id: cap-capturar-assinatura
+      description: Capturar assinatura digital ou foto do termo assinado
+      input: { tipo: enum[digital, foto], dados: blob }
+      output: { assinatura_id: ULID, valida: bool }
+
+    - id: cap-confirmar-emprestimo
+      description: Finalizar registro e gerar evidência
+      input: { emprestimo_id: ULID }
+      output: { artifact: Artifact, execution_id: ULID }
+
+    - id: cap-notificar-beneficiario
+      description: Enviar confirmação por WhatsApp
+      input: { beneficiario_id: ULID, emprestimo_id: ULID, tipo: enum[confirmacao, lembrete, vencimento, atraso] }
+      output: { notificacao_id: ULID, status: enum[enviada, entregue, falha] }
+
+  templates:
+    - name: confirmacao-emprestimo
+      type: output
+      language: pt-BR
+      variables:
+        - name: nome_beneficiario
+          source: CONTEXT  # derivado do beneficiario_id
+        - name: codigo_equipamento
+          source: CONTEXT
+        - name: tipo_equipamento
+          source: CONTEXT
+        - name: data_retirada
+          source: CONTEXT
+        - name: data_devolucao
+          source: CONTEXT
+      body: |
+        Olá {{nome_beneficiario}}!
+
+        Seu empréstimo foi registrado.
+
+        Equipamento: {{tipo_equipamento}}
+        Código: {{codigo_equipamento}}
+        Retirada: {{data_retirada}}
+        Devolução prevista: {{data_devolucao}}
+
+        Em caso de dúvidas, entre em contato com a Secretaria de Assistência Social.
+
+    - name: lembrete-7dias
+      type: output
+      language: pt-BR
+      variables:
+        - name: nome_beneficiario
+          source: CONTEXT
+        - name: codigo_equipamento
+          source: CONTEXT
+        - name: dias_restantes
+          source: PARAMETER
+      body: |
+        Olá {{nome_beneficiario}}!
+
+        Faltam {{dias_restantes}} dias para o vencimento do empréstimo do equipamento {{codigo_equipamento}}.
+
+        Se ainda precisar do equipamento, entre em contato para solicitar renovação.
+
+    - name: atraso
+      type: output
+      language: pt-BR
+      variables:
+        - name: nome_beneficiario
+          source: CONTEXT
+        - name: codigo_equipamento
+          source: CONTEXT
+        - name: dias_atraso
+          source: PARAMETER
+      body: |
+        Olá {{nome_beneficiario}}!
+
+        Seu empréstimo do equipamento {{codigo_equipamento}} encontra-se em atraso há {{dias_atraso}} dias.
+
+        Entre em contato para regularização.
+
+  runtime:
+    invoke: invoke_skill_step
+    entrypoint: skills.gestao_emprestimo.main
+    dependencies:
+      - component: registry
+      - component: composition
+      - component: template-engine
+      - component: whatsapp-gateway
+    security:
+      - control: decision_record_ref_required
+        severity: high
+      - control: manifest_digest_verification
+        severity: critical
+
+  records:
+    certification:
+      - file: records/certification/core.gestao-emprestimo.code-review.yaml
+        level: L1
+      - file: records/certification/core.gestao-emprestimo.dependency-audit.yaml
+        level: L2
+      - file: records/certification/core.gestao-emprestimo.security-scan.yaml
+        level: L3
+    role-assignment:
+      - role: code-reviewer
+        assigned_to: agent-code-reviewer
+      - role: security-auditor
+        assigned_to: agent-security-auditor
