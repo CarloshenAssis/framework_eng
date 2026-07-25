@@ -45,9 +45,9 @@ Analogia atualizada: o sistema operacional está completo e **um programa de ref
 
 ---
 
-## 3. Conteúdo real — 6 ciclos de referência
+## 3. Conteúdo real — 8 ciclos de referência
 
-Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualquer coisa deve existir), o conteúdo abaixo é **instância real**, em `components/` e `records/`.
+Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualquer coisa deve existir), o conteúdo abaixo é **instância real**, em `components/`, `records/` e `bundles/`.
 
 | Ciclo | O que instancia | O que prova |
 |---|---|---|
@@ -57,28 +57,32 @@ Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualqu
 | 4 | Correção de nomenclatura (`human-only-gate`→`high-risk-gate`); certificação L1→L4 do Agent; RoleAssignment formalizada | Erro real encontrado e corrigido (AG2: certificação deve preceder RoleAssignment); gate antes bloqueado agora resolve |
 | 5 | 3 Skills novas (uma sem `templates[]`); Workflow com paralelismo, Retry, Compensação (Saga) | Todo o vocabulário de Workflow §4 exercitado — nada ficou só em prosa |
 | 6 | `Knowledge` derivada de Executions do Ciclo 5; `Playbook` (Knowledge Asset) que a `codifies` | Fecha RFC-DM-001 C1 em conteúdo real; `derives_from` e `provenance()` sobre Knowledge, não só Artifact |
+| 7 | Segundo domínio (documentação de API); Workflow sem Agent/Branch/Decision; primeiro uso de `GATE_AUTO` | Arquitetura não impõe complexidade decisória onde não é necessária; vinculação normativa local (`standards_bound`) exercitada sozinha, sem Policy |
+| 8 | `Bundle` — exporta o Workflow do Ciclo 1 com fecho de dependências via Composition, verifica digest, narra importação em deployment separado | Fecha o único documento de arquitetura (Packaging & Distribution) sem nenhum conteúdo até então; expõe deliberadamente que Standards/Policies não viajam no fecho de Composition |
 
 Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execution real foi processada por um runtime — os ciclos são ilustrativos, mostrando a forma exata que os artefatos assumiriam.
+
+**Marco atingido no Ciclo 8:** todos os 20 documentos de arquitetura ratificados agora têm pelo menos um exemplo real exercitando-os — nenhum permanece "só em prosa".
 
 ---
 
 ## 4. Princípios estruturais provados
 
-- **Zero inflação de entidade** em 20 documentos de arquitetura + 6 ciclos de conteúdo.
-- **Reuso em vez de criação**: *cycle detection* (Kernel §7) reaplicado 6+ vezes; padrão "Value Object escopado a Contract" usado por Capability/Phase/Step/NormativeRequirement/PolicyBinding/Template/TestCase; padrão "família nomeada de Decision" usado por CertificationGrant/RoleAssignment.
-- **Correção sem reescrita silenciosa**: dois erros reais foram encontrados durante a instanciação de conteúdo (nome de fase prometendo garantia inexistente; ordem AG2 violada) — ambos corrigidos com nota explicando o quê, por quê, quando — nunca apagados.
-- **Nenhuma RFC adicional** foi necessária em nenhum momento, nem durante a arquitetura, nem durante os 6 ciclos de conteúdo.
+- **Zero inflação de entidade** em 20 documentos de arquitetura + 8 ciclos de conteúdo.
+- **Reuso em vez de criação**: *cycle detection* (Kernel §7) reaplicado 6+ vezes; padrão "Value Object escopado a Contract" usado por Capability/Phase/Step/NormativeRequirement/PolicyBinding/Template/TestCase; padrão "família nomeada de Decision" usado por CertificationGrant/RoleAssignment; os dois caminhos de vinculação normativa (Policy derivada vs. `standards_bound` local) comprovadamente intercambiáveis, não um substituindo o outro por acidente.
+- **Correção sem reescrita silenciosa**: erros reais foram encontrados durante a instanciação de conteúdo (nome de fase prometendo garantia inexistente; ordem AG2 violada) — corrigidos com nota explicando o quê, por quê, quando — nunca apagados.
+- **Fronteiras arquiteturais expostas, não escondidas**: o Ciclo 8 mostra deliberadamente o que acontece quando alguém ignora uma fronteira documentada (fecho de Composition ≠ vinculação normativa) em vez de fingir que o problema não existe.
+- **Nenhuma RFC adicional** foi necessária em nenhum momento, nem durante a arquitetura, nem durante os 8 ciclos de conteúdo.
 
 ---
 
 ## 5. O que ainda NÃO existe
 
-- Biblioteca ampla de Standards/Skills/Agents/Workflows (o piloto tem ~4 Skills, 1 Agent, 4 Workflows — não dezenas)
+- Biblioteca ampla de Standards/Skills/Agents/Workflows (o piloto tem ~6 Skills, 1 Agent, 5 Workflows, 5 Standards — não dezenas)
 - `Compliance Architecture` ratificada
-- `Standard Package` (`standard_kind: PACKAGE`) instanciado em conteúdo
-- `Bundle` (export/import via Packaging & Distribution) demonstrado em conteúdo
-- Query real de `Observability` (trace/provenance) mostrada como saída literal, não só narrada
-- Domínio de conteúdo fora de "revisão de código/release" — todo o piloto é de um único domínio
+- `Standard Package` (`standard_kind: PACKAGE`) instanciado em conteúdo — único mecanismo nomeado de arquitetura ainda sem exemplo real
+- Query real de `Observability` (trace/provenance) mostrada como saída literal de uma consulta, não só narrada em prosa
+- Terceiro domínio de conteúdo (os dois existentes são code-quality/release e documentação de API)
 
 ---
 
@@ -88,13 +92,12 @@ Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execu
 [RATIFICADO — infraestrutura completa, 20 documentos]
 Constitution → ... → Agent → Organization & Tenancy → Testing → Packaging & Distribution
 
-[EM ANDAMENTO — piloto de conteúdo, 6 ciclos]
-Reference Cycle 1-6 (components/, records/)
+[EM ANDAMENTO — piloto de conteúdo, 8 ciclos — todos os 20 documentos já exercitados]
+Reference Cycle 1-8 (components/, records/, bundles/)
 
-[CANDIDATOS PARA PRÓXIMOS CICLOS — sem ordem obrigatória]
-- Standard Package (agregação via includes)
-- Export/import de Bundle (Packaging & Distribution)
-- Segundo domínio de conteúdo (fora de code-quality/release)
+[CANDIDATOS PARA PRÓXIMOS CICLOS — sem ordem obrigatória, nenhum bloqueante]
+- Standard Package (agregação via includes) — última peça nomeada sem exemplo
+- Terceiro domínio de conteúdo
 - Compliance Architecture (se decidido ratificar)
 
 [DEPOIS — biblioteca em volume, só após decisão explícita de escalar]
@@ -124,11 +127,12 @@ Orchestrator (agente coordenador do ciclo completo)
 ```
 docs/                          arquitetura (índice — texto integral só no histórico da conversa)
   CHECKPOINT.md                 este arquivo
-  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..6)
+  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..8)
 components/                    Manifests reais de Component (Standard/Policy/Skill/Agent/Workflow/Organization/Playbook)
   core/                          namespace compartilhado
   org.acme-corp/                 namespace de tenant, filho de core/
 records/                       Decision Records instanciados (Certification, RoleAssignment, Knowledge)
+bundles/                       Bundle — codificação física de transporte (Packaging & Distribution), não é entidade
 ```
 
 ---
