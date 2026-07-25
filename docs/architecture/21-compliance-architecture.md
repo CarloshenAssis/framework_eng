@@ -2,11 +2,13 @@
 
 ### Framework Eng — A Verificação Contínua de Conformidade Normativa
 
-*Versão 1.0.0 · Base normativa (congelada): Constitution · Kernel · Governance · Domain Model v1.1.0 · RFC-DM-001 · Identity & Namespace · Registry & Discovery · Validation & Certification · Composition · Workflow · Execution · Standards · Policy · Template · Skill · Observability · Agent · Organization & Tenancy · Testing · Packaging & Distribution*
+*Versão 1.1.0 · Base normativa (congelada): Constitution · Kernel · Governance · Domain Model v1.1.0 · RFC-DM-001 · Identity & Namespace · Registry & Discovery · Validation & Certification · Composition · Workflow · Execution · Standards · Policy · Template · Skill · Observability · Agent · Organization & Tenancy · Testing · Packaging & Distribution*
 
 ---
 
-> **Nota de ratificação:** este documento **substitui integralmente** o rascunho de mesmo nome produzido no Bloco 4 (Documento 3 daquele bloco), que permanecia explicitamente não ratificado — consumidor downstream, base normativa congelada não incluía Compliance. A estrutura, o modelo conceitual e a quase totalidade do texto original são preservados; a ratificação exigiu validação contra os **sete documentos ratificados depois do rascunho** (Template, Skill, Observability, Agent, Organization & Tenancy, Testing, Packaging & Distribution) e contra a **versão final de Standards e Policy** (que substituiu integralmente o rascunho do próprio Bloco 4 sobre o qual a versão original de Compliance foi escrita). Essa validação encontrou uma inconsistência real, corrigida abaixo e não apagada: `PolicyBinding.conformance_mode` (Policy §5.3.1) não existia quando Compliance foi rascunhado, e o rascunho original não tinha como determinar se uma Partial Conformance satisfaz ou não um Binding específico. §4.4 (nova) fecha essa lacuna. Referências de seção a Standards e Policy foram corrigidas em todo o documento para apontar às versões ratificadas (`docs/architecture/12-standards-architecture.md`, `13-policy-architecture.md`), cujos números de seção divergem do rascunho do Bloco 4.
+> **Nota de ratificação (v1.0.0):** este documento **substitui integralmente** o rascunho de mesmo nome produzido no Bloco 4 (Documento 3 daquele bloco), que permanecia explicitamente não ratificado — consumidor downstream, base normativa congelada não incluía Compliance. A estrutura, o modelo conceitual e a quase totalidade do texto original são preservados; a ratificação exigiu validação contra os **sete documentos ratificados depois do rascunho** (Template, Skill, Observability, Agent, Organization & Tenancy, Testing, Packaging & Distribution) e contra a **versão final de Standards e Policy** (que substituiu integralmente o rascunho do próprio Bloco 4 sobre o qual a versão original de Compliance foi escrita). Essa validação encontrou uma inconsistência real, corrigida abaixo e não apagada: `PolicyBinding.conformance_mode` (Policy §5.3.1) não existia quando Compliance foi rascunhado, e o rascunho original não tinha como determinar se uma Partial Conformance satisfaz ou não um Binding específico. §4.4 fecha essa lacuna.
+>
+> **Nota de emenda (v1.1.0):** encontrada durante a instanciação do Reference Cycle 11 — a primeira tentativa real de produzir uma Risk Acceptance de nível NR (§4.7) expôs que a v1.0.0 nunca definia o efeito de um Waiver/Risk Acceptance de nível NR sobre `BindingSatisfaction` quando a razão da ausência de Claim é Non-Conformance. A tabela CM14 (§4.4) e a regra normativa CM14 (§11) ganham uma linha simétrica à que já existia para Binding — mesma disciplina de nunca redefinir o que já existia, apenas fechar o que faltava. **MINOR**, não MAJOR (Standards §7.1, por analogia): a mudança apenas adiciona um caso antes indefinido a `satisfied=true`; nenhum caso antes satisfeito passa a não satisfeito.
 
 ---
 
@@ -145,15 +147,19 @@ BindingSatisfaction {
 |---|---|---|---|
 | `STRICT` | qualquer | `true` | `CLAIM_STRICT` |
 | `PARTIAL` | `PARTIAL_ACCEPTABLE` | `true` | `CLAIM_PARTIAL_ACCEPTED` |
-| `PARTIAL` | `STRICT` | `false` (salvo waiver — abaixo) | `CLAIM_PARTIAL_REJECTED` |
-| *(nenhum Claim — Non-Conformance)* | qualquer | `false` | `NO_CLAIM_NON_CONFORMANT` |
-| *(nenhum Claim — indeterminação)* | qualquer | `false` | `NO_CLAIM_INDETERMINATE` |
+| `PARTIAL` | `STRICT` | `false` (salvo waiver de Binding — abaixo) | `CLAIM_PARTIAL_REJECTED` |
+| *(nenhum Claim — Non-Conformance)* | qualquer | `false` (salvo waiver de todo NR falho — abaixo) | `NO_CLAIM_NON_CONFORMANT` |
+| *(nenhum Claim — indeterminação)* | qualquer | `false` (indeterminação nunca é dispensável por Waiver) | `NO_CLAIM_INDETERMINATE` |
 
 Strict Conformance satisfaz qualquer Binding porque Strict **implica** Partial pela própria definição de Standards §8.2 (todo `MUST` e todo `SHOULD` satisfeitos é estritamente mais forte que apenas todo `MUST`). Esta implicação não é uma regra nova — é uma leitura direta das definições já fixadas em Standards §8.2, tornada explícita porque Compliance é o primeiro documento que precisa *comparar* os dois resultados, não apenas produzi-los.
 
 **Waiver sobre `CLAIM_PARTIAL_REJECTED`:** um Binding `STRICT` cujo Claim seja `PARTIAL` **MAY** ser tratado como satisfeito (`reason = WAIVED`) quando existe Waiver ativo (Governance §15, §4.7) cobrindo especificamente a exigência de estritude daquele Binding — não os `SHOULD` individuais, que já são legitimamente dispensáveis sob Partial Conformance sem processo de exceção algum (Standards §8.2 já os declara "não bloqueantes" nesse modo). O que está sendo dispensado é a exigência do Binding, não o requisito do Standard — distinção preservada em `BindingSatisfaction.waiver_ref`, campo separado de `ComplianceVerdict.waiver_ref` (§4.2), embora ambos consumam o mesmo Governance §15 sem mecanismo paralelo.
 
 `[ESCOLHA DE DESIGN]` Waiver de Binding como campo distinto de Waiver de NR, em vez de reusar `ComplianceVerdict.waiver_ref` para os dois casos. Alternativa rejeitada: exigir um Waiver por `SHOULD` individual não satisfeito sempre que o Binding for `STRICT`. Rejeitada porque produziria N processos de exceção (um por `SHOULD` pendente) para uma única decisão institucional real ("aceitamos Partial aqui"), inflando o Exception Process sem ganho de rastreabilidade — a rastreabilidade já existe em `unsatisfied_should` do próprio Claim (Standards ST8).
+
+**Waiver ou Risk Acceptance sobre `NO_CLAIM_NON_CONFORMANT` (v1.1.0):** quando a ausência de Claim é por Non-Conformance — nunca quando é por indeterminação, ver abaixo —, o Binding **MAY** ser tratado como satisfeito (`reason = WAIVED`) quando **todo** `ComplianceVerdict` com `outcome = NON_CONFORMANT` daquele grupo possui `waiver_ref` (§4.2) apontando a um Waiver ou Risk Acceptance de nível NR ativo. É a regra simétrica à de Binding acima, na granularidade oposta: lá, um único Waiver dispensa a exigência de estritude inteira; aqui, cada `MUST`/`MUST_NOT` falho precisa da sua própria dispensa, porque `ComplianceVerdict.waiver_ref` é por definição um campo por-NR (§4.2) — não existe "Waiver de todos os MUST de uma vez" que não seja, na prática, o Waiver de Binding já coberto acima. Esta regra fecha uma lacuna do v1.0.0 deste documento: sem ela, um `ComplianceVerdict` waived (§4.7) permanecia, na prática, tão bloqueante quanto um não-waived, porque `BindingSatisfaction` nunca consultava `waiver_ref` para o caso Non-Conformance — apenas para o caso Partial. Encontrada ao instanciar a primeira Risk Acceptance real de nível NR (Reference Cycle 11); corrigida aqui, não silenciosamente.
+
+**Por que indeterminação nunca é dispensável por Waiver:** um NR `INDETERMINATE` não é uma violação — é a ausência de informação suficiente para julgar (§4.2). Waiver dispensa uma exigência conhecida e não satisfeita; não pode dispensar o que ainda não foi sequer determinado, sob pena de o Waiver silenciosamente absorver o mesmo risco que `INDETERMINATE` existe para tornar visível (§4.2, Constitution — Confiança verificável). A resposta correta a uma indeterminação persistente é produzir a Evidence que falta, nunca dispensá-la.
 
 ### 4.5 Static vs. Runtime Compliance
 
@@ -184,9 +190,9 @@ Ambos são **especializações nominais do Exception Process** (Governance §15)
 
 | Forma | Semântica | Efeito |
 |---|---|---|
-| **Waiver (nível NR)** | Dispensa temporária de um `MUST` específico para um sujeito específico | `ComplianceVerdict.outcome` permanece `NON_CONFORMANT`, marcado com `waiver_ref` (§4.2) |
+| **Waiver (nível NR)** | Dispensa temporária de um `MUST` específico para um sujeito específico | `ComplianceVerdict.outcome` permanece `NON_CONFORMANT`, marcado com `waiver_ref`; se cobrir **todo** NR falho do grupo, `BindingSatisfaction.satisfied = true`, `reason = WAIVED` (§4.2, §4.4 v1.1.0) |
 | **Waiver (nível Binding)** | Dispensa da exigência de estritude de um Binding `STRICT` quando o Claim é `PARTIAL` | `BindingSatisfaction.satisfied = true`, `reason = WAIVED` (§4.4) |
-| **Risk Acceptance** | Aceitação formal do risco residual, sem promessa de remediação no prazo | Idem a qualquer das formas acima, com classificação de risco anexada (Governance §14) |
+| **Risk Acceptance** | Aceitação formal do risco residual, sem promessa de remediação no prazo — classificação de risco anexada (Governance §14) | Idem a qualquer das formas acima, na mesma granularidade (NR ou Binding); a única diferença de Waiver é semântica institucional (risco aceito vs. correção prometida), nunca de mecanismo |
 
 `[ESCOLHA DE DESIGN]` Waiver **MUST NOT** converter `ComplianceVerdict.outcome` em `CONFORMANT`, nem `BindingSatisfaction.reason` em `CLAIM_STRICT`/`CLAIM_PARTIAL_ACCEPTED`. Alternativa descartada: tratar waiver como conformidade concedida — rejeitada porque destruiria a distinção auditável entre "obedece" e "foi dispensado de obedecer", corrompendo permanentemente a série histórica de conformidade e violando Constitution (Auditabilidade: "deve ser sempre possível reconstruir por que algo foi feito"). Precedente: em auditoria de segurança, uma exceção aprovada nunca reclassifica o achado como inexistente — ela o marca como aceito.
 
@@ -447,7 +453,7 @@ Particionamento e consistência: herdam integralmente as garantias de Execution 
 | CM11 | `ContinuousCompliance` SHOULD ser assíncrono e priorizado por risco | SHOULD |
 | CM12 | Runtime Compliance MAY ser invocado por `GATE_AUTO` (Workflow §4) | MAY |
 | CM13 | Static Compliance MAY ser cacheado por `(subject@version, eps_id)` | MAY |
-| CM14 | `BindingSatisfaction` MUST ser computada pela tabela §4.4 — Strict Conformance sempre satisfaz; Partial Conformance satisfaz apenas Bindings `PARTIAL_ACCEPTABLE`, salvo Waiver de Binding | MUST |
+| CM14 | `BindingSatisfaction` MUST ser computada pela tabela §4.4 — Strict Conformance sempre satisfaz; Partial Conformance satisfaz apenas Bindings `PARTIAL_ACCEPTABLE`, salvo Waiver de Binding; Non-Conformance satisfaz apenas se todo NR falho tiver Waiver/Risk Acceptance de nível NR (v1.1.0) | MUST |
 | CM15 | `ConformanceClaim` MUST NOT ser emitido quando qualquer `MUST`/`MUST_NOT` do grupo estiver `NON_CONFORMANT` ou quando `indeterminate` for não vazio | MUST NOT |
 
 ---
@@ -535,6 +541,8 @@ Particionamento e consistência: herdam integralmente as garantias de Execution 
 
 **Nenhum documento da base normativa foi alterado.** A única correção substantiva desta ratificação em relação ao rascunho do Bloco 4 — a introdução de `BindingSatisfaction` (§4.4) — não modifica Standards nem Policy; ela **consome** um campo (`conformance_mode`) que Policy já define desde sua própria ratificação v1.0.0, e que o rascunho original de Compliance simplesmente antecedia. `ConformanceClaim` é emitido, não redefinido. Compliance Architecture fecha o vigésimo primeiro documento da base normativa, e o último cuja ratificação permanecia pendente desde o Bloco 4.
 
+A emenda v1.1.0 (§4.4, §4.7, §11) segue a mesma disciplina: nenhum documento externo a este foi tocado; o campo `ComplianceVerdict.waiver_ref` já existia desde a v1.0.0 (§4.2) — a emenda apenas define o efeito, antes ausente, desse campo sobre `BindingSatisfaction` no caso Non-Conformance. Encontrada pela via que este Framework já usa sistematicamente para achar erros reais: tentar instanciar o mecanismo com dado concreto (Reference Cycle 11), não revisão em abstrato.
+
 ---
 
-*Fim do documento. Versão 1.0.0.*
+*Fim do documento. Versão 1.1.0.*
