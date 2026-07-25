@@ -1,0 +1,102 @@
+# Subject: core/skill.static-analysis.code-review@1.0.0
+# Tipo de registro: Decision Record, família CertificationGrant (Domain Model §14)
+# Base normativa: Validation & Certification Architecture v1.0.0 (níveis L0-L4)
+#                  + Testing Architecture v1.0.0 (TestRunReport como Evidence)
+#                  + Standards Architecture v1.0.0 (Conformance Claim como Evidence)
+#
+# Regra de composição de score (Validation & Certification §5): avanço de nível
+# exige o MÍNIMO por dimensão, nunca média ponderada — cada nível abaixo lista
+# exatamente a Evidence que o satisfaz, sem compensação entre dimensões.
+
+subject: core/skill.static-analysis.code-review@1.0.0
+manifest_digest: "sha256:PLACEHOLDER_DIGEST_OF_CANONICAL_MANIFEST_SERIALIZATION"
+
+certification_history:
+
+  # ── L1 — Structurally Valid ────────────────────────────────────────────
+  # Validation & Certification §5: automática, autorizada pelo sistema,
+  # perpétua enquanto o Manifest não mudar de versão (Kernel §8, imutabilidade).
+  - level: L1
+    subtype: CertificationGrant
+    name: "Structurally Valid"
+    evidence:
+      - evidence_kind: STRUCTURAL
+        description: >
+          Kernel §8 Verification: os 15 campos do Component Contract
+          presentes e bem formados; templates[] validado por Template §9
+          (K1-K7: nenhum Placeholder órfão, nenhuma Variable duplicada,
+          grafo extends/includes vazio e portanto trivialmente acíclico);
+          test_suite[] validado por Testing §5.1 (TestCaseIdentifier único).
+        result: PASS
+        reproducible: true
+    authorized_by: role.system.kernel-validator
+    granted_at: "2026-07-25T10:00:00Z"
+    valid_until: null            # perpétua — Validation & Certification §5
+
+  # ── L2 — Functionally Validated ────────────────────────────────────────
+  # Skill §7.3 fecha este critério: Testing consiste em Executions da própria
+  # Skill sob Input variado; aqui, o test_suite[] já declarado no Manifest.
+  - level: L2
+    subtype: CertificationGrant
+    name: "Functionally Validated"
+    evidence:
+      - evidence_kind: TEST_RESULT
+        description: "TestRunReport — Testing Architecture §5.2"
+        test_run_id: "tr-01J8X3QK9M2R5S8VQKX3ZC7NWT"
+        outcome: PASS
+        results:
+          - test_case: "core/skill.static-analysis.code-review@1.0.0#test.no-secrets-detected"
+            outcome: PASS
+          - test_case: "core/skill.static-analysis.code-review@1.0.0#test.max-diff-size-boundary-reject"
+            outcome: PASS
+        coverage:
+          requirements_covered:
+            - "core/standard.code-quality.review-baseline@1.0.0#nr.no-hardcoded-secrets"
+          coverage_ratio: 1.0    # 100% dos NR MUST/MUST_NOT aplicáveis a ARTIFACT — satisfaz TS9
+    authorized_by: role.governance-area.code-quality.reviewer
+    granted_at: "2026-07-25T11:30:00Z"
+    valid_until: "2027-01-25T11:30:00Z"   # janela proporcional a risco MÉDIO — Governance §14
+
+  # ── L3 — Standards Certified ───────────────────────────────────────────
+  # Standards §8.4 fecha este critério: L3 exige Strict Conformance,
+  # nunca Partial — verificado abaixo (indeterminate=[] obrigatório, ST18).
+  - level: L3
+    subtype: CertificationGrant
+    name: "Standards Certified"
+    evidence:
+      - evidence_kind: CONFORMANCE_CLAIM
+        description: "Conformance Claim — Standards Architecture §8.1"
+        standard: core/standard.code-quality.review-baseline@1.0.0
+        conformance_level: BASE
+        mode: STRICT              # Partial MUST NOT satisfazer L3 — Standards ST19
+        satisfied:
+          - "core/standard.code-quality.review-baseline@1.0.0#nr.no-hardcoded-secrets"
+        unsatisfied_should: []
+        indeterminate: []          # MUST ser vazio para o Claim ser válido — Standards ST18
+    authorized_by: role.governance-area.code-quality.steward
+    granted_at: "2026-07-25T13:00:00Z"
+    valid_until: "2026-11-25T13:00:00Z"
+
+  # ── L4 — Institutionally Certified ─────────────────────────────────────
+  # Validation & Certification §5 + Agent §7 (AG4 generaliza a mesma regra):
+  # Certifier humano obrigatório, Reproducibility comprovada.
+  - level: L4
+    subtype: CertificationGrant
+    name: "Institutionally Certified"
+    evidence:
+      - evidence_kind: TEST_RESULT
+        description: >
+          Reprodutibilidade — Template §7 (TP2): Expand() de prompt.main e de
+          output.review_report reexecutado 3x com o mesmo VariableBindingSet;
+          resultado byte-idêntico nas 3 execuções (mesmo template_digest,
+          mesmo bindings_digest — Template §12).
+        reproducible: true
+      - evidence_kind: ATTESTATION
+        description: >
+          Atestação humana: comportamento sob diffs ambíguos avaliado
+          manualmente contra 5 casos reais fora do test_suite declarado.
+        producer_role_class: role.governance-area.code-quality.human-lead
+    certifier_role_id: role.governance-area.code-quality.human-lead
+    authorized_by: role.governance-area.code-quality.human-lead
+    granted_at: "2026-07-25T15:00:00Z"
+    valid_until: "2026-10-25T15:00:00Z"   # janela mais curta — nível mais alto, Governance §14
