@@ -2,15 +2,15 @@
 
 *Atualizado em: 2026-07-25 · Branch: `claude/software-engineering-framework-fatdob`*
 
-> Este arquivo é um **ponto de controle**, não um documento arquitetural. Ele existe para que o estado do projeto sobreviva ao encerramento de qualquer sessão de conversa. Substitui integralmente a versão anterior deste checkpoint (que dizia "nenhum conteúdo real existe ainda" — isso deixou de ser verdade a partir dos ciclos de referência descritos na Seção 3; e que dizia que o texto integral da arquitetura só existia no histórico da conversa — isso deixou de ser verdade com a persistência descrita na Seção 9).
+> Este arquivo é um **ponto de controle**, não um documento arquitetural. Ele existe para que o estado do projeto sobreviva ao encerramento de qualquer sessão de conversa. Substitui integralmente a versão anterior deste checkpoint (que dizia "nenhum conteúdo real existe ainda" — isso deixou de ser verdade a partir dos ciclos de referência descritos na Seção 3; que dizia que o texto integral da arquitetura só existia no histórico da conversa — isso deixou de ser verdade com a persistência descrita na Seção 10; e que não mencionava nenhuma tradução executável — isso deixou de ser verdade com o Caminho B, Seção 4).
 
 ---
 
 ## 1. Onde estamos
 
-A infraestrutura institucional está **completa**: 21 documentos de arquitetura ratificados (Compliance Architecture em v1.1.0 — ver nota da Seção 2), do Constitution ao Compliance Architecture, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, já existem **12 ciclos de referência** de conteúdo real (Standards, Policies, Skills, Agent, Workflows, Organization, records de Certificação/RoleAssignment/Knowledge/Compliance, consultas literais de Observability) — um piloto pequeno e deliberado, não uma biblioteca em volume, cujo objetivo foi validar cada peça da arquitetura sobre dado concreto antes de qualquer geração em escala.
+A infraestrutura institucional está **completa**: 21 documentos de arquitetura ratificados (Compliance Architecture em v1.1.0 — ver nota da Seção 2), do Constitution ao Compliance Architecture, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, existem **12 ciclos de referência** de conteúdo institucional ilustrativo (Seção 3) **e**, como frente distinta iniciada nesta sessão, uma primeira tradução real e executável para o Claude Code (Seção 4) — a primeira coisa neste repositório que roda como Skill/Subagent de verdade, fora do universo de especificação.
 
-Analogia atualizada: o sistema operacional está completo e **um programa de referência já roda nele**, ponta a ponta, com falhas e recuperação reais — mas a "loja de aplicativos" (biblioteca ampla de Standards/Skills/Agents/Workflows) ainda não existe.
+Analogia atualizada: o sistema operacional está completo, um programa de referência roda nele ponta a ponta em simulação, **e agora existe também um primeiro programa real, compilado para uma plataforma concreta (Claude Code)** — menor e mais simples que o programa de referência institucional, porque a plataforma concreta não tem todos os serviços que o sistema operacional oferece.
 
 ---
 
@@ -48,9 +48,9 @@ Uma segunda lacuna, menor, foi encontrada logo em seguida ao tentar instanciar R
 
 ---
 
-## 3. Conteúdo real — 12 ciclos de referência
+## 3. Conteúdo institucional real — 12 ciclos de referência
 
-Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualquer coisa deve existir), o conteúdo abaixo é **instância real**, em `components/`, `records/` e `bundles/`.
+Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualquer coisa deve existir), o conteúdo abaixo é **instância real**, em `components/`, `records/` e `bundles/` — mas ainda ilustrativa quanto a runtime (ver ressalva abaixo). Distinto do Caminho B (Seção 4), que roda de verdade, com escopo menor.
 
 | Ciclo | O que instancia | O que prova |
 |---|---|---|
@@ -67,55 +67,83 @@ Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualqu
 | 11 | `Compliance Drift` real (`detect_drift` sobre os dois Reports do Ciclo 10, sem nova Execution); primeira Non-Conformance genuína do piloto; primeira `Risk Acceptance` real (nível NR, com `risk_classification`) | Fecha as duas últimas peças nomeadas de Compliance Architecture sem exemplo real; expôs e motivou a emenda v1.1.0 (Waiver/Risk Acceptance de nível NR propagando para `BindingSatisfaction` no caso Non-Conformance) |
 | 12 | Saída literal de `trace()`, `provenance()` e `query_events()` (Observability Query Service, §7.1) sobre dado já produzido nos Ciclos 10-11 — nenhum `components/`/`records/` novo, de propósito (OB2 proíbe persistir Trace/Span/Provenance Chain) | Fecha a última lacuna registrada que não era mecanismo sem exemplo, mas consulta narrada em vez de mostrada; `provenance()` liga mecanicamente a Evidence do Ciclo 11 à Risk Acceptance que a resolveu |
 
-Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execution real foi processada por um runtime — os ciclos são ilustrativos, mostrando a forma exata que os artefatos assumiriam.
+Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execution real foi processada por um runtime institucional próprio — os ciclos são ilustrativos, mostrando a forma exata que os artefatos assumiriam. Essa ressalva **não se aplica** ao Caminho B (Seção 4), que roda sob o runtime real do Claude Code, com escopo deliberadamente menor.
 
 **Marco atingido no Ciclo 9** (temporariamente reaberto pela ratificação de Compliance como 21º documento, fechado de novo pelo Ciclo 10, refinado pelo Ciclo 11): todos os 21 documentos e todo mecanismo nomeado de arquitetura ratificados têm, agora, pelo menos um exemplo real exercitando-os — incluindo Drift e Risk Acceptance, as duas últimas peças de Compliance Architecture ainda em prosa depois do Ciclo 10. O Ciclo 12 fecha uma lacuna de natureza diferente: não um mecanismo sem exemplo, mas uma consulta (`Observability Query Service`) sempre narrada, nunca mostrada como dado literal. Ver `docs/reference-cycle-10-walkthrough.md` a `docs/reference-cycle-12-walkthrough.md`.
 
 ---
 
-## 4. Princípios estruturais provados
+## 4. Caminho B — tradução executável para Claude Code
 
-- **Zero inflação de entidade** em 21 documentos de arquitetura + 12 ciclos de conteúdo.
+Frente nova, iniciada nesta sessão, distinta em natureza dos 12 ciclos da Seção 3: em vez de mais uma instância institucional ilustrativa, uma **tradução real** de uma fatia do piloto para os primitivos nativos do Claude Code — a primeira coisa neste repositório que uma sessão do Claude Code descobre e pode efetivamente invocar.
+
+| Traduzido | De | Para |
+|---|---|---|
+| Skill de análise | `core/skill.static-analysis.code-review@1.0.0` | `.claude/skills/code-review/SKILL.md` |
+| Agent de decisão | `core/agent.code-reviewer@1.0.0` | `.claude/agents/code-reviewer.md` |
+
+Mapeamento completo, conceito a conceito (o que traduz bem, o que vira instrução textual, o que não tem equivalente) em `docs/claude-code-translation.md` — inclui, sem suavizar, que **Standard, Policy, Workflow, Certification e Compliance não têm primitivo nativo no Claude Code** e que AG4/AG5 (coautorização humana, proibição de autoaprovação) sobrevivem apenas como instrução no prompt, não como gate estrutural.
+
+**Status de verificação:** frontmatter YAML dos dois arquivos validado estruturalmente (`yaml.safe_load`, campos corretos, caminhos corretos). Tentativa de invocação funcional real, dentro desta mesma sessão, **falhou** — não porque os arquivos estejam errados, mas porque a lista de agentes desta sessão foi fixada no início da conversa, antes destes arquivos existirem, e não recarrega dinamicamente. Verificação funcional real requer uma sessão nova do Claude Code aberta neste repositório. Isto está registrado explicitamente em `docs/claude-code-translation.md` §5 — nenhuma alegação de "funciona" sem a ressalva.
+
+**Por que só esta fatia:** a mais madura e mais validada do piloto — certificada L1→L4 (Ciclo 3), já exercitada por Compliance Assessment real (Ciclos 10-11). Estabelece o padrão de tradução; os outros cinco Skills, os quatro Workflows restantes e a Organization ficam como candidato explícito (Seção 7), não como trabalho abandonado.
+
+---
+
+## 5. Princípios estruturais provados
+
+- **Zero inflação de entidade** em 21 documentos de arquitetura + 12 ciclos de conteúdo institucional.
 - **Reuso em vez de criação**: *cycle detection* (Kernel §7) reaplicado 6+ vezes; padrão "Value Object escopado a Contract" usado por Capability/Phase/Step/NormativeRequirement/PolicyBinding/Template/TestCase; padrão "família nomeada de Decision" usado por CertificationGrant/RoleAssignment/Waiver/Risk Acceptance; os dois caminhos de vinculação normativa (Policy derivada vs. `standards_bound` local) comprovadamente intercambiáveis, não um substituindo o outro por acidente — inclusive quando entram em níveis diferentes e precisam de união não trivial (Ciclo 10).
 - **Correção sem reescrita silenciosa**: erros reais foram encontrados durante a instanciação de conteúdo (nome de fase prometendo garantia inexistente; ordem AG2 violada) e, duas vezes, durante a própria ratificação/instanciação de Compliance Architecture na mesma sessão (`conformance_mode` ausente do rascunho; depois, Waiver/Risk Acceptance de nível NR sem efeito sobre Binding) — todos corrigidos com nota explicando o quê, por quê, quando, nunca apagados.
-- **Fronteiras arquiteturais expostas, não escondidas**: o Ciclo 8 mostra deliberadamente o que acontece quando alguém ignora uma fronteira documentada (fecho de Composition ≠ vinculação normativa) em vez de fingir que o problema não existe.
+- **Fronteiras arquiteturais expostas, não escondidas**: o Ciclo 8 mostra deliberadamente o que acontece quando alguém ignora uma fronteira documentada (fecho de Composition ≠ vinculação normativa) em vez de fingir que o problema não existe; o Caminho B (Seção 4) faz o mesmo com o que se perde ao sair da especificação institucional para um runtime real.
 - **Nenhuma RFC adicional** foi necessária em nenhum momento, nem durante a arquitetura, nem durante os 12 ciclos de conteúdo — a única emenda em qualquer documento ratificado, em toda a sessão, foi a v1.1.0 de Compliance, MINOR e puramente aditiva.
-- **Regras normativas aplicadas até na forma dos próprios registros do piloto**: o Ciclo 12 deliberadamente não criou nenhum arquivo em `records/` porque OB2 (Observability) proíbe persistir exatamente o tipo de dado que ele produz — a disciplina de reuso/não-invenção vale também para onde e como este piloto guarda o que produz, não só para o conteúdo técnico.
+- **Regras normativas aplicadas até na forma dos próprios registros do piloto**: o Ciclo 12 deliberadamente não criou nenhum arquivo em `records/` porque OB2 (Observability) proíbe persistir exatamente o tipo de dado que ele produz.
+- **Alegação de "funciona" sempre acompanhada de como foi verificado**: o Caminho B distingue explicitamente validação estrutural (feita) de validação funcional (não feita nesta sessão, com o motivo exato registrado) — mesma disciplina de nunca superestimar o que foi provado, agora aplicada a software que roda de verdade, não só a YAML ilustrativo.
 
 ---
 
-## 5. O que ainda NÃO existe
+## 6. O que ainda NÃO existe
 
-- Biblioteca ampla de Standards/Skills/Agents/Workflows (o piloto tem ~6 Skills, 1 Agent, 5 Workflows, 6 Standards, 4 Policies — não dezenas)
-- Terceiro domínio de conteúdo (os dois existentes são code-quality/release e documentação de API)
-- `debug()`, `replay()`, `export_metrics()` — as três operações do Observability Query Service que o Ciclo 12 não exercitou (focou em `trace`/`provenance`/`query_events`, as três formas estruturalmente distintas de consulta)
+- Biblioteca ampla de Standards/Skills/Agents/Workflows institucionais (o piloto tem ~6 Skills, 1 Agent, 5 Workflows, 6 Standards, 4 Policies — não dezenas)
+- Terceiro domínio de conteúdo institucional (os dois existentes são code-quality/release e documentação de API)
+- `debug()`, `replay()`, `export_metrics()` — as três operações do Observability Query Service que o Ciclo 12 não exercitou
+- Tradução Claude Code dos cinco Skills/quatro Workflows restantes do piloto (Seção 4 traduziu só a cadeia do Ciclo 1)
+- Verificação funcional real (sessão nova) de que `code-review`/`code-reviewer` são descobertos e invocados corretamente pelo Claude Code
+- Um hook `PreToolUse` real (scanner de segredo executável) para recuperar mecanicamente a garantia que `nr.no-hardcoded-secrets` perdeu ao virar só instrução textual na tradução
 
-**Fechado no Ciclo 9:** `Standard Package` — última peça nomeada de arquitetura sem exemplo real, entre os 20 documentos daquele momento. **Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21; Ciclo 10 (Assessment, Conformance Claim, Binding Satisfaction, Waiver de Binding); emenda v1.1.0 (Waiver/Risk Acceptance de nível NR); Ciclo 11 (Drift, Risk Acceptance); Ciclo 12 (`trace`/`provenance`/`query_events` como saída literal). Não há mais documento de arquitetura em estado de rascunho não ratificado, nem mecanismo nomeado de nenhum dos 21 documentos sem exemplo real, nem consulta central de Observability apenas narrada. O que resta em aberto é decisão de escala (biblioteca em volume) ou de escopo (terceiro domínio de conteúdo, as três operações remanescentes de Observability), não validação arquitetural de nenhum mecanismo central.
+**Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21; Ciclos 10-12 (Assessment, Conformance Claim, Binding Satisfaction, Drift, Risk Acceptance, consultas literais de Observability); emenda v1.1.0; e a abertura do Caminho B com a primeira tradução real e executável. Não há mais documento de arquitetura em rascunho não ratificado, nem mecanismo nomeado sem exemplo real, nem consulta central de Observability apenas narrada. O que resta em aberto é decisão de escala (biblioteca institucional em volume), de escopo (terceiro domínio, resto do Caminho B), ou de verificação (sessão nova para confirmar o Caminho B em runtime real) — não validação arquitetural de nenhum mecanismo central.
 
 ---
 
-## 6. Roadmap
+## 7. Roadmap
 
 ```
 [RATIFICADO — infraestrutura completa, 21 documentos]
 Constitution → ... → Testing → Packaging & Distribution → Compliance Architecture (v1.1.0)
 
-[CONCLUÍDO — piloto de conteúdo, 12 ciclos — todo mecanismo nomeado exercitado nos 21 documentos,
+[CONCLUÍDO — piloto institucional, 12 ciclos — todo mecanismo nomeado exercitado nos 21 documentos,
  e as três formas centrais de consulta de Observability mostradas como saída literal]
-Reference Cycle 1-12 (components/, records/, bundles/, docs/reference-cycle-12-walkthrough.md)
+Reference Cycle 1-12 (components/, records/, bundles/)
+
+[INICIADO — Caminho B, tradução executável para Claude Code]
+code-review (Skill) + code-reviewer (Agent)          .claude/skills/, .claude/agents/
+  ├── validado estruturalmente
+  └── validação funcional em sessão nova              [PENDENTE]
 
 [CANDIDATOS PARA CONTINUAÇÃO FUTURA — sem ordem obrigatória, nenhum bloqueante]
-- Terceiro domínio de conteúdo
-- `debug()`/`replay()`/`export_metrics()` — operações de Observability ainda não mostradas como saída literal
+- Verificar o Caminho B em sessão nova; se confirmado, estender aos 5 Skills/4 Workflows restantes
+- Hook PreToolUse real para nr.no-hardcoded-secrets (recupera garantia mecânica perdida na tradução)
+- Terceiro domínio de conteúdo institucional
+- `debug()`/`replay()`/`export_metrics()` de Observability como saída literal
 
-[DEPOIS — biblioteca em volume, só após decisão explícita de escalar]
+[DEPOIS — biblioteca institucional em volume, só após decisão explícita de escalar]
 Standards/Skills/Templates/Agents/Workflows reais em quantidade
 Orchestrator (agente coordenador do ciclo completo)
 ```
 
 ---
 
-## 7. Riscos e lacunas conhecidas
+## 8. Riscos e lacunas conhecidas
 
 | Lacuna | Origem | Status |
 |---|---|---|
@@ -126,34 +154,42 @@ Orchestrator (agente coordenador do ciclo completo)
 | Separação de funções, Role ocupado por Agent (caso geral) | Achado H2 | ✅ Fechada — Agent Architecture §7 (AG4/AG5) |
 | Evidence para `EvaluationMethod=DYNAMIC` em escala | Standards §19 | ✅ Fechada — Testing Architecture |
 | Mecanismo de verificação contínua de conformidade (Compliance) | Governance §13 | ✅ Fechada — Compliance Architecture (documento 21) |
+| AG4/AG5 sem gate estrutural equivalente no Claude Code | Caminho B (Seção 4) | Aberta, registrada — instrução textual apenas, sem mecanismo de enforcement |
+| `nr.no-hardcoded-secrets` sem verificação mecânica no Claude Code | Caminho B (Seção 4) | Aberta, registrada — candidato: hook `PreToolUse` real (Seção 7) |
 
-**Risco psicológico** (mantido da versão anterior deste checkpoint, ainda vigente): tendência de introduzir conceitos que "parecem úteis" sem necessidade real. A disciplina de reuso — inclusive durante a instanciação de conteúdo, onde dois erros reais foram corrigidos em vez de mascarados — continua sendo o ativo mais valioso do projeto.
+**Risco psicológico** (mantido da versão anterior deste checkpoint, ainda vigente): tendência de introduzir conceitos que "parecem úteis" sem necessidade real. A disciplina de reuso continua sendo o ativo mais valioso do projeto — agora testada também contra a tentação oposta, no Caminho B: superestimar o quanto uma tradução simplificada preserva das garantias institucionais originais.
 
 ---
 
-## 8. Estrutura do repositório
+## 9. Estrutura do repositório
 
 ```
 docs/
   CHECKPOINT.md                 este arquivo
   architecture/                  texto integral dos 21 documentos ratificados (ver Seção 2)
     01-constitution.md .. 21-compliance-architecture.md
-  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..12)
-components/                    Manifests reais de Component (Standard/Policy/Skill/Agent/Workflow/Organization/Playbook)
+  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo institucional (N=1..12)
+  claude-code-translation.md    mapeamento completo do Caminho B (Seção 4) — o que traduz, o que se perde
+components/                    Manifests reais de Component institucional (Standard/Policy/Skill/Agent/Workflow/Organization/Playbook)
   core/                          namespace compartilhado
   org.acme-corp/                 namespace de tenant, filho de core/
-records/                       Decision Records e Artifacts instanciados (Certification, RoleAssignment,
+records/                       Decision Records e Artifacts institucionais (Certification, RoleAssignment,
                                  Knowledge, Compliance — ver records/README.md)
 bundles/                       Bundle — codificação física de transporte (Packaging & Distribution), não é entidade
+.claude/                       Caminho B — Skills e Agents REAIS, descobertos pelo Claude Code
+  skills/code-review/SKILL.md    tradução de core/skill.static-analysis.code-review@1.0.0
+  agents/code-reviewer.md        tradução de core/agent.code-reviewer@1.0.0
 ```
 
 ---
 
-## 9. Ação pendente
+## 10. Ação pendente
 
-**Fechada.** O texto integral dos 21 documentos de arquitetura está persistido em `docs/architecture/01-*.md` a `21-*.md` — deixou de existir apenas no histórico da conversa. Standards e Policy (`12`, `13`) usam a versão ratificada v1.0.0 que substitui integralmente o rascunho do Bloco 4; Compliance Architecture (`21`) foi ratificada nesta sessão, validada contra a base completa (Seção 2, nota).
+**Fechada (persistência):** o texto integral dos 21 documentos de arquitetura está persistido em `docs/architecture/01-*.md` a `21-*.md` — deixou de existir apenas no histórico da conversa. Standards e Policy (`12`, `13`) usam a versão ratificada v1.0.0 que substitui integralmente o rascunho do Bloco 4; Compliance Architecture (`21`) foi ratificada nesta sessão, validada contra a base completa (Seção 2, nota).
 
-Não há ação pendente conhecida de persistência. O que resta em aberto é decisão de escala ou escopo (Seção 6), não recuperação de conteúdo já produzido.
+**Aberta (verificação funcional):** o Caminho B (Seção 4) precisa ser confirmado em uma sessão nova do Claude Code — `code-review` e `code-reviewer` foram validados apenas estruturalmente nesta sessão, não invocados com sucesso (motivo registrado em `docs/claude-code-translation.md` §5, não é falha do arquivo).
+
+O que resta em aberto além disso é decisão de escala ou escopo (Seção 7), não recuperação de conteúdo já produzido nem dúvida sobre a arquitetura.
 
 ---
 
