@@ -77,16 +77,18 @@ Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execu
 
 Frente nova, iniciada nesta sessão, distinta em natureza dos 12 ciclos da Seção 3: em vez de mais uma instância institucional ilustrativa, uma **tradução real** de uma fatia do piloto para os primitivos nativos do Claude Code — a primeira coisa neste repositório que uma sessão do Claude Code descobre e pode efetivamente invocar.
 
-| Traduzido | De | Para |
-|---|---|---|
-| Skill de análise | `core/skill.static-analysis.code-review@1.0.0` | `.claude/skills/code-review/SKILL.md` |
-| Agent de decisão | `core/agent.code-reviewer@1.0.0` | `.claude/agents/code-reviewer.md` |
+| Traduzido | De | Para | Verificação funcional |
+|---|---|---|---|
+| Skill de análise | `core/skill.static-analysis.code-review@1.0.0` | `.claude/skills/code-review/SKILL.md` | ✅ Confirmada — invocada, classificou segredo como `blocker` e ausência de teste como `major`, corretamente |
+| Agent de decisão | `core/agent.code-reviewer@1.0.0` | `.claude/agents/code-reviewer.md` | ✅ Confirmada — invocou a Skill internamente, decidiu `REQUEST_CHANGES` citando evidência concreta, verificou autoria, sinalizou risco alto para revisão humana |
+| Skill de auditoria | `core/skill.security.dependency-audit@1.0.0` | `.claude/skills/dependency-audit/SKILL.md` | ✅ Confirmada — classificou `event-stream@3.3.6` como `critical` e corretamente **não** classificou `left-pad@1.0.0` (incidente de disponibilidade, não vulnerabilidade) |
+| Hook mecânico para `nr.no-hardcoded-secrets` | (nenhum Component institucional — Standard vira só prosa) | `.claude/hooks/check-no-secrets.sh` + `.claude/settings.json` | ⚠️ Script correto em 4/4 simulações diretas; disparo real via `git commit` dentro desta sessão **não confirmado** — ver nota abaixo |
 
-Mapeamento completo, conceito a conceito (o que traduz bem, o que vira instrução textual, o que não tem equivalente) em `docs/claude-code-translation.md` — inclui, sem suavizar, que **Standard, Policy, Workflow, Certification e Compliance não têm primitivo nativo no Claude Code** e que AG4/AG5 (coautorização humana, proibição de autoaprovação) sobrevivem apenas como instrução no prompt, não como gate estrutural.
+Mapeamento completo, conceito a conceito (o que traduz bem, o que vira instrução textual, o que não tem equivalente) em `docs/claude-code-translation.md` — inclui, sem suavizar, que **Standard, Policy, Workflow, Certification e Compliance não têm primitivo nativo no Claude Code** e que AG4/AG5 (coautorização humana, proibição de autoaprovação) sobrevivem apenas como instrução no prompt, não como gate estrutural (exceto o único NR que o hook recupera mecanicamente, com a ressalva acima).
 
-**Status de verificação:** frontmatter YAML dos dois arquivos validado estruturalmente (`yaml.safe_load`, campos corretos, caminhos corretos). Tentativa de invocação funcional real, dentro desta mesma sessão, **falhou** — não porque os arquivos estejam errados, mas porque a lista de agentes desta sessão foi fixada no início da conversa, antes destes arquivos existirem, e não recarrega dinamicamente. Verificação funcional real requer uma sessão nova do Claude Code aberta neste repositório. Isto está registrado explicitamente em `docs/claude-code-translation.md` §5 — nenhuma alegação de "funciona" sem a ressalva.
+**Correção de uma nota anterior desta mesma sessão:** eu havia registrado que Skills "recarregam dinamicamente" e Subagents não. Isso estava incompleto — `code-reviewer` (Subagent) passou a ser descoberto e foi invocado com sucesso mais tarde na mesma sessão, com o mesmo resultado de qualidade. A observação correta: tanto Skills quanto Subagents recarregam dentro da mesma sessão, mas com um atraso não instantâneo após a criação do arquivo — a tentativa imediatamente após criar um arquivo tende a falhar; uma tentativa alguns turnos depois tende a funcionar. Hooks de `settings.json` parecem seguir uma regra mais estrita (não confirmado disparar nesta sessão, ver `docs/claude-code-translation.md` §7) — plausivelmente por design de segurança, não por defeito.
 
-**Por que só esta fatia:** a mais madura e mais validada do piloto — certificada L1→L4 (Ciclo 3), já exercitada por Compliance Assessment real (Ciclos 10-11). Estabelece o padrão de tradução; os outros cinco Skills, os quatro Workflows restantes e a Organization ficam como candidato explícito (Seção 7), não como trabalho abandonado.
+**Por que só esta fatia:** a mais madura e mais validada do piloto — certificada L1→L4 (Ciclo 3), já exercitada por Compliance Assessment real (Ciclos 10-11) — mais uma segunda Skill standalone para provar o padrão em outro contexto. Estabelece o padrão de tradução, agora com verificação funcional real de ponta a ponta para dois dos três tipos de artefato (Skill, Subagent); os Skills de release/documentação restantes, os Workflows, e a confirmação do hook ficam como candidato explícito (Seção 7), não como trabalho abandonado.
 
 ---
 
@@ -107,11 +109,10 @@ Mapeamento completo, conceito a conceito (o que traduz bem, o que vira instruç�
 - Biblioteca ampla de Standards/Skills/Agents/Workflows institucionais (o piloto tem ~6 Skills, 1 Agent, 5 Workflows, 6 Standards, 4 Policies — não dezenas)
 - Terceiro domínio de conteúdo institucional (os dois existentes são code-quality/release e documentação de API)
 - `debug()`, `replay()`, `export_metrics()` — as três operações do Observability Query Service que o Ciclo 12 não exercitou
-- Tradução Claude Code dos cinco Skills/quatro Workflows restantes do piloto (Seção 4 traduziu só a cadeia do Ciclo 1)
-- Verificação funcional real (sessão nova) de que `code-review`/`code-reviewer` são descobertos e invocados corretamente pelo Claude Code
-- Um hook `PreToolUse` real (scanner de segredo executável) para recuperar mecanicamente a garantia que `nr.no-hardcoded-secrets` perdeu ao virar só instrução textual na tradução
+- Tradução Claude Code das Skills de release/documentação e dos Workflows do piloto (Seção 4 traduziu a cadeia do Ciclo 1 mais uma Skill standalone)
+- Confirmação de que o hook `PreToolUse` (`check-no-secrets.sh`) dispara de fato via o harness — testado com sucesso por simulação direta do script, mas um `git commit` real dentro desta sessão não foi bloqueado
 
-**Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21; Ciclos 10-12 (Assessment, Conformance Claim, Binding Satisfaction, Drift, Risk Acceptance, consultas literais de Observability); emenda v1.1.0; e a abertura do Caminho B com a primeira tradução real e executável. Não há mais documento de arquitetura em rascunho não ratificado, nem mecanismo nomeado sem exemplo real, nem consulta central de Observability apenas narrada. O que resta em aberto é decisão de escala (biblioteca institucional em volume), de escopo (terceiro domínio, resto do Caminho B), ou de verificação (sessão nova para confirmar o Caminho B em runtime real) — não validação arquitetural de nenhum mecanismo central.
+**Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21; Ciclos 10-12 (Assessment, Conformance Claim, Binding Satisfaction, Drift, Risk Acceptance, consultas literais de Observability); emenda v1.1.0; abertura do Caminho B; verificação funcional real de duas Skills e do Subagent (Seção 4); e a escrita/teste direto (não via harness) de um hook mecânico para o único NR `MUST_NOT` da fatia traduzida. Não há mais documento de arquitetura em rascunho não ratificado, nem mecanismo nomeado sem exemplo real, nem consulta central de Observability apenas narrada, nem dúvida sobre se uma Skill ou Subagent traduzido funciona de fato. O que resta em aberto é decisão de escala (biblioteca institucional em volume), de escopo (terceiro domínio, resto do Caminho B), ou de verificação (disparo real do hook em sessão nova) — não validação arquitetural de nenhum mecanismo central.
 
 ---
 
@@ -126,13 +127,15 @@ Constitution → ... → Testing → Packaging & Distribution → Compliance Arc
 Reference Cycle 1-12 (components/, records/, bundles/)
 
 [INICIADO — Caminho B, tradução executável para Claude Code]
-code-review (Skill) + code-reviewer (Agent)          .claude/skills/, .claude/agents/
-  ├── validado estruturalmente
-  └── validação funcional em sessão nova              [PENDENTE]
+code-review (Skill)        .claude/skills/code-review/        ✅ confirmada funcionalmente
+code-reviewer (Subagent)   .claude/agents/code-reviewer.md     ✅ confirmada funcionalmente
+dependency-audit (Skill)   .claude/skills/dependency-audit/    ✅ confirmada funcionalmente
+check-no-secrets (hook)    .claude/hooks/ + settings.json      ⚠️  script correto, disparo real via
+                                                                    harness não confirmado
 
 [CANDIDATOS PARA CONTINUAÇÃO FUTURA — sem ordem obrigatória, nenhum bloqueante]
-- Verificar o Caminho B em sessão nova; se confirmado, estender aos 5 Skills/4 Workflows restantes
-- Hook PreToolUse real para nr.no-hardcoded-secrets (recupera garantia mecânica perdida na tradução)
+- Confirmar o disparo real do hook PreToolUse em sessão nova
+- Estender o padrão às Skills de release/documentação e aos Workflows restantes do piloto
 - Terceiro domínio de conteúdo institucional
 - `debug()`/`replay()`/`export_metrics()` de Observability como saída literal
 
@@ -154,8 +157,8 @@ Orchestrator (agente coordenador do ciclo completo)
 | Separação de funções, Role ocupado por Agent (caso geral) | Achado H2 | ✅ Fechada — Agent Architecture §7 (AG4/AG5) |
 | Evidence para `EvaluationMethod=DYNAMIC` em escala | Standards §19 | ✅ Fechada — Testing Architecture |
 | Mecanismo de verificação contínua de conformidade (Compliance) | Governance §13 | ✅ Fechada — Compliance Architecture (documento 21) |
-| AG4/AG5 sem gate estrutural equivalente no Claude Code | Caminho B (Seção 4) | Aberta, registrada — instrução textual apenas, sem mecanismo de enforcement |
-| `nr.no-hardcoded-secrets` sem verificação mecânica no Claude Code | Caminho B (Seção 4) | Aberta, registrada — candidato: hook `PreToolUse` real (Seção 7) |
+| AG4/AG5 sem gate estrutural equivalente no Claude Code | Caminho B (Seção 4) | Aberta, registrada — instrução textual apenas, sem mecanismo de enforcement (mas seguida corretamente nos testes reais feitos) |
+| `nr.no-hardcoded-secrets` sem verificação mecânica confirmada no Claude Code | Caminho B (Seção 4) | Hook escrito e correto por simulação direta; disparo real via harness não confirmado nesta sessão |
 
 **Risco psicológico** (mantido da versão anterior deste checkpoint, ainda vigente): tendência de introduzir conceitos que "parecem úteis" sem necessidade real. A disciplina de reuso continua sendo o ativo mais valioso do projeto — agora testada também contra a tentação oposta, no Caminho B: superestimar o quanto uma tradução simplificada preserva das garantias institucionais originais.
 
@@ -176,9 +179,13 @@ components/                    Manifests reais de Component institucional (Stand
 records/                       Decision Records e Artifacts institucionais (Certification, RoleAssignment,
                                  Knowledge, Compliance — ver records/README.md)
 bundles/                       Bundle — codificação física de transporte (Packaging & Distribution), não é entidade
-.claude/                       Caminho B — Skills e Agents REAIS, descobertos pelo Claude Code
-  skills/code-review/SKILL.md    tradução de core/skill.static-analysis.code-review@1.0.0
-  agents/code-reviewer.md        tradução de core/agent.code-reviewer@1.0.0
+.claude/                       Caminho B — Skills, Agents e hook REAIS, descobertos pelo Claude Code
+  settings.json                  registra o hook PreToolUse abaixo
+  skills/code-review/SKILL.md    tradução de core/skill.static-analysis.code-review@1.0.0 — confirmada
+  skills/dependency-audit/SKILL.md  tradução de core/skill.security.dependency-audit@1.0.0 — confirmada
+  agents/code-reviewer.md        tradução de core/agent.code-reviewer@1.0.0 — confirmada
+  hooks/check-no-secrets.sh      barreira mecânica para nr.no-hardcoded-secrets — script correto,
+                                   disparo real via harness não confirmado
 ```
 
 ---
@@ -187,7 +194,9 @@ bundles/                       Bundle — codificação física de transporte (P
 
 **Fechada (persistência):** o texto integral dos 21 documentos de arquitetura está persistido em `docs/architecture/01-*.md` a `21-*.md` — deixou de existir apenas no histórico da conversa. Standards e Policy (`12`, `13`) usam a versão ratificada v1.0.0 que substitui integralmente o rascunho do Bloco 4; Compliance Architecture (`21`) foi ratificada nesta sessão, validada contra a base completa (Seção 2, nota).
 
-**Aberta (verificação funcional):** o Caminho B (Seção 4) precisa ser confirmado em uma sessão nova do Claude Code — `code-review` e `code-reviewer` foram validados apenas estruturalmente nesta sessão, não invocados com sucesso (motivo registrado em `docs/claude-code-translation.md` §5, não é falha do arquivo).
+**Fechada (verificação funcional de Skills/Subagent):** `code-review`, `code-reviewer` e `dependency-audit` foram todos invocados de verdade nesta sessão e produziram o resultado correto — não apenas validados estruturalmente. Ver Seção 4 e `docs/claude-code-translation.md` §5.
+
+**Aberta (verificação funcional do hook):** `.claude/hooks/check-no-secrets.sh` está correto — comprovado por simulação direta do payload que o harness documenta — mas um `git commit` real com segredo staged, dentro desta sessão, não foi bloqueado. Hipótese mais provável (não confirmada): configuração de hooks carregada no início da sessão, não recarregada em runtime, por design de segurança. Precisa de sessão nova para confirmar. Detalhe completo em `docs/claude-code-translation.md` §7.
 
 O que resta em aberto além disso é decisão de escala ou escopo (Seção 7), não recuperação de conteúdo já produzido nem dúvida sobre a arquitetura.
 
