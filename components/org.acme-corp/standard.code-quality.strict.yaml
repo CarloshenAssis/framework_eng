@@ -1,0 +1,80 @@
+# Coordinate: org.acme-corp/standard.code-quality.strict
+# component_type: Standard
+# Base normativa: Standards Architecture v1.0.0 — §6.1 (extends, substituibilidade)
+
+identity: org.acme-corp/standard.code-quality.strict
+version: 1.0.0
+component_type: Standard
+lifecycle_state: Active
+owner: role.org.acme-corp.steward
+purpose: >
+  Especialização, para a organização acme-corp, do baseline institucional
+  de revisão de código — eleva cobertura de teste de recomendada a
+  obrigatória e adiciona proibição de comentários TODO em código de produção.
+
+precedence_level: PROJECT              # mais específico que DOMAIN (core baseline)
+standard_kind: NORMATIVE
+
+# extends — Standards §6.1: herda todos os NRs do base; MAY adicionar ou elevar
+# força normativa; MUST NOT remover nem enfraquecer. Referência SEMPRE versionada.
+extends:
+  - core/standard.code-quality.review-baseline@1.0.0
+
+requirements:
+  # nr.test-coverage-present do base era SHOULD — aqui é redeclarado com o
+  # MESMO rid, elevado a MUST. Isso é permitido por Standards §6.1 (elevação
+  # de força normativa em `extends` é o único tipo de "sobrescrita" legal).
+  - rid: nr.test-coverage-present
+    normative_keyword: MUST            # base: SHOULD → aqui: MUST (elevação, nunca enfraquecimento)
+    statement: >
+      Toda mudança de código MUST ser acompanhada de teste correspondente.
+      (Elevado de SHOULD para MUST — política interna da acme-corp.)
+    target:
+      component_types: [Skill, Agent]
+      applies_to: ARTIFACT
+    evaluation:
+      kind: DYNAMIC
+      deterministic: true
+      evidence:
+        evidence_kind: TEST_RESULT
+        reproducible: true
+        retention: PERMANENT           # elevado também na retenção — Standards §7.1,
+                                         # tornar EvidenceRequirement mais rigoroso = MAJOR
+        minimum_artifacts: 1
+    introduced_in: 1.0.0
+
+  - rid: nr.no-todo-in-production
+    normative_keyword: MUST_NOT
+    statement: >
+      O código revisado MUST_NOT conter comentários "TODO" ou "FIXME" sem
+      referência a um item de rastreamento (ex.: "TODO(JIRA-123)").
+    target:
+      component_types: [Skill, Agent]
+      applies_to: ARTIFACT
+    evaluation:
+      kind: STATIC
+      deterministic: true
+      evidence:
+        evidence_kind: STRUCTURAL
+        reproducible: true
+        retention: BOUNDED
+        retention_duration: P1Y
+        minimum_artifacts: 1
+    introduced_in: 1.0.0
+
+# nr.no-hardcoded-secrets é herdado de extends, intocado — continua MUST_NOT.
+
+conformance_levels:
+  - name: STRICT
+    inherits_from: null                 # nível próprio; combina com BASE/EXTENDED do
+                                         # Standard base por União na resolução (Standards §12.1)
+    requires: [nr.test-coverage-present, nr.no-todo-in-production]
+    description: "Nível obrigatório para todo código revisado dentro de org.acme-corp."
+
+retired_rids: []
+
+# Nota de substituibilidade (não normativa, ilustrativa):
+# Conformidade a este Standard no nível STRICT IMPLICA conformidade ao
+# Standard base no nível BASE — a mesma Evidence de nr.no-hardcoded-secrets
+# satisfaz ambos, e nr.test-coverage-present aqui é estritamente mais forte
+# que o SHOULD do base (Standards §6.1, garantia de substituibilidade).

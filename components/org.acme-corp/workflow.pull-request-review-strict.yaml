@@ -1,0 +1,88 @@
+# Coordinate: org.acme-corp/workflow.pull-request-review-strict
+# component_type: Workflow
+# Base normativa: Workflow Architecture v1.0.0 — Branch/Decision Point (§4, §6.2)
+
+identity: org.acme-corp/workflow.pull-request-review-strict
+version: 1.0.0
+component_type: Workflow
+lifecycle_state: Active
+owner: role.org.acme-corp.steward
+purpose: >
+  Variante do ciclo de revisão de PR para org.acme-corp: reutiliza a Skill
+  de análise estática do núcleo (core/) via composição cross-namespace,
+  e ramifica (Branch) para um gate humano-obrigatório quando um achado
+  "blocker" é encontrado, ou para o gate padrão (elegível a Agent) caso
+  contrário.
+
+inputs:
+  - name: pull_request_diff
+    type: text
+    required: true
+
+outputs:
+  - name: final_decision
+    type: artifact/json
+
+phases:
+  - id: phase.static-review
+    steps:
+      - id: step.run-code-review
+        kind: INVOCATION
+        slot:
+          # Referência cross-namespace TOTALMENTE QUALIFICADA — Identity §10,
+          # nunca resolução implícita entre Namespaces distintos.
+          required_capability: static-analysis.code-review
+          pinned_coordinate: core/skill.static-analysis.code-review@1.0.0
+          version_range: "^1.0.0"
+          min_certification_level: L2
+          cardinality: EXACTLY_ONE
+        failure_policy:
+          on_failure: ABORT
+    next: [phase.risk-branch]
+
+  # Decision Point puro — nenhuma invocação, apenas avaliação de predicado
+  # sobre o Artifact produzido na fase anterior (Workflow §4/§6.2).
+  - id: phase.risk-branch
+    steps: []
+    next:
+      - target: phase.human-only-gate
+        condition: "review_report.findings.any(f => f.severity == 'blocker')"
+      - target: phase.agent-gate
+        condition: "!review_report.findings.any(f => f.severity == 'blocker')"
+
+  - id: phase.human-only-gate
+    steps:
+      - id: step.human-decision
+        kind: GATE_APPROVAL
+        slot:
+          required_capability: role-eligibility.reviewer
+          version_range: "^1.0.0"
+          min_certification_level: L4     # Validation & Certification §5 — L4 exige
+                                            # Certifier/decisor humano, nunca só Agent
+          cardinality: EXACTLY_ONE
+        failure_policy:
+          on_failure: ABORT
+    next: []
+
+  - id: phase.agent-gate
+    steps:
+      - id: step.agent-decision
+        kind: GATE_APPROVAL
+        slot:
+          required_capability: role-eligibility.reviewer
+          version_range: "^1.0.0"
+          min_certification_level: L2      # Agent elegível (AG2 — nível proporcional a risk_tier BAIXO/MÉDIO)
+          cardinality: EXACTLY_ONE
+        failure_policy:
+          on_failure: ABORT
+    next: []
+
+# Nota de composição (não normativa, ilustrativa):
+# Effective Policy Set para step.run-code-review, dentro de org.acme-corp, é a
+# UNIÃO de:
+#   1. core/policy.code-quality.mandatory-review@1.0.0   (scope=["core","org.*"])
+#   2. org.acme-corp/policy.code-quality.strict-enforcement@1.0.0  (scope=["org.acme-corp"], mais específico)
+# As duas se ACUMULAM (Standards diferentes, sem conflito de nível — Policy §7.4/§7.5):
+# a Execution só é permitida se a Evidence produzida satisfizer SIMULTANEAMENTE
+# BASE (core) e STRICT (acme-corp) — e, por extends (Standards §6.1), satisfazer
+# STRICT já implica satisfazer BASE para os requisitos herdados sem alteração.

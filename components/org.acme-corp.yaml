@@ -1,0 +1,25 @@
+# Coordinate: org.acme-corp
+# component_type: Organization  (Structural Component — Domain Model §3; Coordinate == raiz do Namespace)
+# Base normativa: Organization & Tenancy Architecture v1.0.0
+
+identity: org.acme-corp
+version: 1.0.0
+component_type: Organization
+lifecycle_state: Active
+owner: role.org.acme-corp.steward        # autoridade administrativa de todo o Namespace "org.acme-corp/"
+
+purpose: >
+  Organização de exemplo usada para demonstrar isolamento multi-tenant,
+  extensão de Standards e composição cross-namespace sobre o núcleo (core/).
+
+capabilities:
+  - org.hosts-regulated-workload         # tag opcional, útil para Policy targeting futuro
+
+constraints: []
+
+metadata:
+  contact: "governance@acme-corp.example"
+  category: "pilot-tenant"
+
+# Membership NÃO é campo deste Manifest (Organization Architecture §6.2) —
+# é derivado por consulta a RoleAssignment escopados a este Namespace.

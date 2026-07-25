@@ -1,0 +1,38 @@
+# Coordinate: org.acme-corp/policy.code-quality.strict-enforcement
+# component_type: Policy
+# Base normativa: Policy Architecture v1.0.0 — §7.1 (herança por Namespace), §7.4 (união)
+
+identity: org.acme-corp/policy.code-quality.strict-enforcement
+version: 1.0.0
+component_type: Policy
+lifecycle_state: Active
+owner: role.org.acme-corp.steward
+purpose: >
+  Exigir o Standard estendido (STRICT) para toda Skill/Agent com capability
+  de revisão de código operando dentro de org.acme-corp — em adição
+  (nunca em substituição) à Policy institucional já herdada de core/.
+
+priority: 20                            # mais específico por Namespace já decide (Policy §7.2);
+                                          # priority só desempata dentro do mesmo nível
+
+scope:
+  namespaces: ["org.acme-corp"]         # MAIS ESPECÍFICO que ["core", "org.*"] da Policy de core/
+  component_types: [Skill, Agent]
+  capabilities: ["static-analysis.code-review"]
+  applies_at: EXECUTION
+
+condition: null
+
+bindings:
+  - standard: org.acme-corp/standard.code-quality.strict@1.0.0
+    conformance_level: STRICT
+    conformance_mode: STRICT
+
+enforcement_mode: BLOCKING
+
+effective_from: "2026-07-25T00:00:00Z"
+expires_at: null
+
+overrides: []                            # NÃO sobrepõe core/policy.code-quality.mandatory-review —
+                                          # as duas se ACUMULAM (Policy §7.4/§7.5 — Standards
+                                          # diferentes não conflitam, apenas se unem)
