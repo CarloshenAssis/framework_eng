@@ -34,11 +34,18 @@ Analogia atualizada: o sistema operacional está completo, um programa de refer�
 | 14 | Template Architecture v1.0.0 | Prompt/Input/Output Template, determinismo de expansão |
 | 15 | Skill Architecture v1.0.0 | Skill = Operational Component puro |
 | 16 | Observability Architecture v1.0.0 | Trace, Span, Provenance Chain, fecha Provenance Service |
-| 17 | Agent Architecture v1.0.0 | RoleAssignment, Decision institucional, fecha H2 |
+| 17 | ~~Agent Architecture v1.0.0~~ | **DEPRECATED** (ver nota no topo do arquivo) — RoleAssignment, Decision institucional, fecha H2. Superseded por 23. |
 | 18 | Organization & Tenancy Architecture v1.0.0 | Organization como Component, Membership, isolamento |
-| 19 | Testing Architecture v1.0.0 | Test Case, Test Run Report, Cobertura, Regressão |
+| 19 | ~~Testing Architecture v1.0.0~~ | **DEPRECATED** (ver nota no topo do arquivo) — Test Case, Test Run Report, Cobertura, Regressão. Superseded por 24. |
 | 20 | Packaging & Distribution Architecture v1.0.0 | Bundle, integridade em trânsito, exportação de métricas |
 | 21 | Compliance Architecture **v1.1.0** | Compliance Assessment, Conformance Claim, Binding Satisfaction, Drift, Waiver/Risk Acceptance |
+| 22 | RFC-COMP-001 | Fecha `resolve_assembly` de Composition §5 — `EnumerateSlots(component)`, dispatch por tipo |
+| 23 | Agent Architecture v1.0.0 (canônico) | Goal=conteúdo de Context, Action=`Step` reutilizado; substitui o documento 17 |
+| 24 | Testing Architecture v1.0.0 (canônico) | TestCase/TestKind (11 valores), Test Result=Evidence, Coverage=Metric; substitui o documento 19 |
+| 25 | Quality Gate Architecture v1.0.0 | Catálogo de 18 Gates nomeados = configuração de `Step(GATE_AUTO\|GATE_APPROVAL)` |
+| 26 | Security Architecture v1.0.0 | Catálogo de 21 controles de segurança = uso nomeado de Standard/Policy/TestKind/Gate |
+
+**Nota sobre a sessão que produziu 22-26:** esta frente foi conduzida sem verificar, antes de escrever 23 e 24, que os documentos 17 e 19 já existiam e já cobriam o mesmo escopo — produzindo a duplicação registrada nas notas de topo desses dois arquivos. Resolvida mantendo 23-26 como cadeia canônica (25 e 26 já dependem do vocabulário de 23/24) e depreciando 17/19 formalmente, sem apagar seu texto. Ver §8 para o impacto sobre conteúdo já instanciado (Reference Cycle 4, `records/role-assignment/`, `records/certification/core.agent.code-reviewer.yaml`).
 
 **Nota:** o rascunho de *Compliance Architecture* produzido no Bloco 4 foi **ratificado** nesta sessão como documento 21 (v1.0.0), após validação contra os sete documentos ratificados depois dele (Template, Skill, Observability, Agent, Organization & Tenancy, Testing, Packaging & Distribution) e contra a versão final de Standards/Policy. Essa validação encontrou e fechou uma lacuna real: `PolicyBinding.conformance_mode` não existia quando o rascunho foi escrito, e a versão ratificada introduziu `Binding Satisfaction` (§4.4) para determinar corretamente se uma Partial Conformance satisfaz um Binding `STRICT`.
 
@@ -159,6 +166,7 @@ Orchestrator (agente coordenador do ciclo completo)
 | Mecanismo de verificação contínua de conformidade (Compliance) | Governance §13 | ✅ Fechada — Compliance Architecture (documento 21) |
 | AG4/AG5 sem gate estrutural equivalente no Claude Code | Caminho B (Seção 4) | Aberta, registrada — instrução textual apenas, sem mecanismo de enforcement (mas seguida corretamente nos testes reais feitos) |
 | `nr.no-hardcoded-secrets` sem verificação mecânica confirmada no Claude Code | Caminho B (Seção 4) | Hook escrito e correto por simulação direta; disparo real via harness não confirmado nesta sessão |
+| Reference Cycle 4 e `records/role-assignment/reviewer.yaml`/`records/certification/core.agent.code-reviewer.yaml`/`components/core/agent.code-reviewer.yaml`/`components/core/standard.governance.agent-decision-integrity.yaml` citam o mecanismo `RoleAssignment` do documento 17 (agora deprecated) | Duplicação Agent/Testing (documentos 17/19 vs. 23/24) | Aberta, registrada — conteúdo permanece publicado como histórico do piloto; reconciliação com o desenho do documento 23 (Goal/Action) não foi feita nesta sessão |
 
 **Risco psicológico** (mantido da versão anterior deste checkpoint, ainda vigente): tendência de introduzir conceitos que "parecem úteis" sem necessidade real. A disciplina de reuso continua sendo o ativo mais valioso do projeto — agora testada também contra a tentação oposta, no Caminho B: superestimar o quanto uma tradução simplificada preserva das garantias institucionais originais.
 

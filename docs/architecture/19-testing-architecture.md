@@ -1,4 +1,29 @@
 # Testing Architecture
+
+> ## ⚠ DEPRECATED — superseded por `24-testing-architecture.md` (v1.0.0)
+>
+> **Motivo, registrado explicitamente (Constitution, Regra Imutável nº8 — nenhuma exceção/correção silenciosa):**
+> mesma duplicação real descrita na nota de topo de `17-agent-architecture.md` — este documento e
+> `24-testing-architecture.md` reivindicavam, simultaneamente, ser "Testing Architecture v1.0.0", com
+> desenhos genuinamente diferentes para o mesmo escopo (`TestCase`/`Assertion`/`TestRunReport` com geração
+> por análise de fronteira, aqui; `TestCase`/`TestKind` de onze valores com Coverage=`Metric`, lá).
+>
+> **Por que o documento 24 foi mantido como canônico, não este:** os documentos 25 (Quality Gate) e 26
+> (Security) — já ratificados nesta mesma sessão — citam e dependem, sem alteração, do vocabulário do
+> documento 24 (`TestKind`, `test_suite[]`, `ExecuteTestSuite`), não deste.
+>
+> **Este texto permanece publicado, integralmente e sem edição, abaixo desta nota** — mesma disciplina de
+> Kernel §3 (`Archived`: histórico nunca apagado). Nenhuma citação futura deve tratar o conteúdo abaixo como
+> base normativa vigente do Framework Eng.
+>
+> **Impacto conhecido sobre conteúdo já instanciado, não silenciado:**
+> `records/certification/core.agent.code-reviewer.yaml` referencia o vocabulário `Assertion.kind=HUMAN_REVIEW`
+> e `TestRunReport` deste documento (não o `TestKind`/`test_suite[]` do documento 24). Esse conteúdo permanece
+> como registro histórico do piloto — reconciliação é trabalho futuro explicitamente **não realizado** nesta
+> sessão. Ver `docs/CHECKPOINT.md` §2, §8.
+
+---
+
 ### Framework Eng — A Formalização de Geração, Execução, Cobertura e Regressão de Teste
 
 *Versão 1.0.0 · Base normativa (congelada): Constitution · Kernel · Governance · Domain Model v1.1.0 · RFC-DM-001 · Identity & Namespace · Registry & Discovery · Validation & Certification · Composition · Workflow · Execution · Standards · Policy · Template Architecture · Skill Architecture · Observability Architecture · Agent Architecture · Organization & Tenancy*

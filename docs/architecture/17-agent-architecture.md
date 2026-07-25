@@ -1,4 +1,35 @@
 # Agent Architecture
+
+> ## ⚠ DEPRECATED — superseded por `23-agent-architecture.md` (v1.0.0)
+>
+> **Motivo, registrado explicitamente (Constitution, Regra Imutável nº8 — nenhuma exceção/correção silenciosa):**
+> durante a construção de `24-testing-architecture.md`, `25-quality-gate-architecture.md` e
+> `26-security-architecture.md` nesta sessão, verificou-se que este documento e `23-agent-architecture.md`
+> reivindicavam, simultaneamente, ser "Agent Architecture v1.0.0" — duplicação real (Constitution, Regra
+> Imutável nº10), descoberta tarde demais para evitar, com ao menos uma contradição direta e verificável:
+> a regra **AG6** deste documento (§14) proíbe explicitamente Agent de declarar Phase/Step estático
+> (*"Agent MUST NOT declarar Phase/Step estático... orquestração é sempre dinâmica, por Slot"*); o documento
+> 23, §4.3, faz exatamente o oposto — modela a decomposição do Agent **reaproveitando `Step` (Workflow §4)
+> diretamente** como sua unidade de ação.
+>
+> **Por que o documento 23 foi mantido como canônico, não este:** os documentos 25 e 26 — já ratificados
+> nesta mesma sessão — citam e dependem, sem alteração, do vocabulário do documento 23 (não deste). Manter
+> este documento como canônico exigiria reescrever 25 e 26 também.
+>
+> **Este texto permanece publicado, integralmente e sem edição, abaixo desta nota** — mesma disciplina de
+> Kernel §3 (`Archived`: histórico nunca apagado, apenas deixa de ser fonte de consumo ativo). Nenhuma
+> citação futura deve tratar o conteúdo abaixo como base normativa vigente do Framework Eng.
+>
+> **Impacto conhecido sobre conteúdo já instanciado, não silenciado:** `docs/reference-cycle-4-walkthrough.md`,
+> `components/core/agent.code-reviewer.yaml`, `components/core/standard.governance.agent-decision-integrity.yaml`,
+> `records/role-assignment/reviewer.yaml` e `records/certification/core.agent.code-reviewer.yaml` foram
+> construídos citando o mecanismo `RoleAssignment` (§4.2 abaixo). Esse conteúdo permanece no repositório como
+> registro histórico do piloto institucional — sua reconciliação com o desenho do documento 23 (`Goal`
+> carregado em `Context`, `Action` = `Step` reutilizado, sem `RoleAssignment`) é trabalho futuro
+> explicitamente **não realizado** nesta sessão. Ver `docs/CHECKPOINT.md` §2, §8.
+
+---
+
 ### Framework Eng — A Especialização com Autoridade Decisória do Component
 
 *Versão 1.0.0 · Base normativa (congelada): Constitution · Kernel · Governance · Domain Model v1.1.0 · RFC-DM-001 · Identity & Namespace · Registry & Discovery · Validation & Certification · Composition · Workflow · Execution · Standards · Policy · Template Architecture · Skill Architecture · Observability Architecture*
