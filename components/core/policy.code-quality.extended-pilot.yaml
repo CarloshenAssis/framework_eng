@@ -1,0 +1,64 @@
+# Coordinate: core/policy.code-quality.extended-pilot
+# component_type: Policy
+# Base normativa: Policy Architecture v1.0.0 — §7.3 (overrides), §5.3.1 (conformance_mode)
+#
+# Ciclo 10 — a única peça de conteúdo novo que este ciclo introduz. Existe para
+# dar a `PolicyBinding.conformance_mode` (Policy §5.3.1) um caso real em que
+# `PARTIAL_ACCEPTABLE` importa de fato: `core/policy.code-quality.mandatory-review`
+# (BASE, STRICT) nunca poderia produzir Partial Conformance, porque o nível BASE
+# do Standard que ela vincula só exige um único MUST_NOT — não há nenhum SHOULD
+# no conjunto resolvido para ser "parcialmente" satisfeito. O nível EXTENDED do
+# MESMO Standard já existe desde o Ciclo 1 (review-baseline.yaml §conformance_levels)
+# mas nunca foi vinculado por nenhuma Policy — esta é a primeira vez que é.
+
+identity: core/policy.code-quality.extended-pilot
+version: 1.0.0
+component_type: Policy
+lifecycle_state: Active
+owner: role.governance-area.code-quality.steward
+purpose: >
+  Pilotar, por período determinado, a elevação do critério institucional de
+  BASE para EXTENDED (cobertura de teste passa a ser avaliada, ainda que não
+  bloqueante) — sem tornar EXTENDED obrigatório enquanto a tooling de coleta
+  de TEST_RESULT para nr.test-coverage-present ainda está sendo calibrada.
+
+priority: 15                            # desempate apenas — mesma especificidade de
+                                          # Namespace que mandatory-review (§7.2)
+
+scope:
+  namespaces: ["core", "org.*"]         # idêntico a mandatory-review, deliberadamente
+  component_types: [Skill, Agent]
+  capabilities: ["static-analysis.code-review"]
+  applies_at: EXECUTION
+
+condition: null
+
+bindings:
+  - standard: core/standard.code-quality.review-baseline@1.0.0
+    conformance_level: EXTENDED         # BASE + nr.test-coverage-present (SHOULD)
+    conformance_mode: PARTIAL_ACCEPTABLE
+    # Deliberadamente NÃO STRICT: nr.test-coverage-present é SHOULD neste Standard
+    # (diferente de org.acme-corp/standard.code-quality.strict, que o eleva a MUST —
+    # ver components/org.acme-corp/standard.code-quality.strict.yaml). Enquanto o
+    # piloto dura, um Claim{mode:PARTIAL} MUST satisfazer este Binding
+    # (Compliance Architecture §4.4, CM14) — é exatamente o comportamento que se
+    # quer: sinalizar, não bloquear.
+
+enforcement_mode: BLOCKING               # o MUST_NOT herdado (nr.no-hardcoded-secrets)
+                                          # continua bloqueante; só o SHOULD é que não é
+
+effective_from: "2026-07-25T17:00:00Z"   # depois de todo o resto do piloto (Ciclos 1-9)
+                                          # e depois da Execution formalizada em Ciclo 10 Assessment A
+expires_at: "2026-10-25T17:00:00Z"       # piloto de 3 meses — decisão institucional,
+                                          # não um mecanismo novo (Policy §5.5, atributo, não estado)
+
+# Mesma especificidade de Namespace que mandatory-review (ambas ["core","org.*"]) e
+# MESMO Standard (review-baseline) em níveis comparáveis (BASE ⊆ EXTENDED, monotônico
+# — Standards §4.4) produziriam união por Policy §7.4 se ambas permanecessem ativas
+# simultaneamente. `overrides` evita essa ambiguidade deliberadamente: durante o
+# piloto, EXTENDED/PARTIAL_ACCEPTABLE SUBSTITUI BASE/STRICT — não se soma a ele.
+# Isso é uma escolha institucional (fazer uma transição limpa), não uma limitação
+# da união restritiva, que permanece plenamente válida para o caso geral (Ciclo 2
+# já a exercita, entre Standards distintos).
+overrides:
+  - core/policy.code-quality.mandatory-review@1.0.0

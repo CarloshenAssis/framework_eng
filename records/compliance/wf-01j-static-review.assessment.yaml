@@ -1,0 +1,98 @@
+# Subject: Execution de step.run-code-review, orchestration wf-01J... (Ciclo 1)
+# Tipo de registro: Artifact, ComplianceReport (Compliance Architecture §4, §5)
+#
+# Formaliza como Artifact persistido a verificação que, até este ciclo, existia
+# apenas em prosa em docs/reference-cycle-walkthrough.md §2 Fase 1: "Policy check
+# (BLOCKING, applies_at=EXECUTION) ... dispatch só prossegue se [conformidade]
+# satisfizer BASE STRICT" — mesma disciplina de nunca deixar uma verificação
+# referenciada só em narrativa quando ela pode ser um artefato concreto (já
+# aplicada a RoleAssignment no Ciclo 4).
+
+assessment:
+  assessment_id: "cmp-01J8Y1RQ2K4M6N8PVKX9ZC3RWA"      # Identity §4.2 — ULID
+  kind: RUNTIME                                          # Compliance §4.5 — applies_at=EXECUTION ⟹ RUNTIME
+  subject: core/skill.static-analysis.code-review@1.0.0
+  execution_context:
+    orchestration_id: "wf-01J8Y1RQ0G2H4J6KVKX7ZC1PWN"    # mesmo id da Fase 1, Ciclo 1
+    phase_id: phase.static-review
+    step_id: step.run-code-review
+    attempt: 0
+    namespace_ancestry: [core]                            # subject e orquestração ambos em core/ —
+                                                            # ver Ciclo 2 para o caso cross-namespace
+  context_snapshot_id: "cs-01J8Y1RQ0G2H4J6KVKX7ZC1PWN-0"  # RFC-DM-001 C2 — obrigatório antes de Running
+  evaluated_at: "2026-07-25T09:15:00Z"
+  performed_by: role.system.compliance-service             # substrato, Compliance §5 — não é Role humano/Agent
+                                                             # aqui porque é assessment automático de dispatch;
+                                                             # ver Compliance §4.1 para o caso Role=Agent/humano
+
+effective_policy_set_ref: "eps-01J8Y1RQ0G2H4J6KVKX7ZC1PWN"
+resolution_trace:
+  # Policy §11.1 — apenas uma Policy no scope de core/: candidates_considered=[mandatory-review]
+  # (extended-pilot ainda não existe: effective_from=2026-07-25T17:00:00Z, POSTERIOR a este assessment —
+  # filtro TEMPORAL da Fase 2 do algoritmo já o exclui mesmo que fosse considerado)
+  candidates_considered:
+    - core/policy.code-quality.mandatory-review@1.0.0
+  filtered_out: []
+  suppressed_by_override: []
+  conflicts_resolved: []
+  # Kernel §2.14 — standards_bound do próprio Manifest do Skill já declara o MESMO
+  # Standard no MESMO nível (review-baseline@BASE) — Policy §7.5: união trivial,
+  # sem conflito, porque os dois lados concordam exatamente.
+  standards_bound_merged:
+    - standard: core/standard.code-quality.review-baseline@1.0.0
+      level: BASE
+      merge_outcome: IDENTICAL_NO_OP     # Kernel §2.14 ∪ Policy-derivado, mesmo nível — Policy §7.5
+
+verdicts:
+  - nr_id: "core/standard.code-quality.review-baseline@1.0.0#nr.no-hardcoded-secrets"
+    standard: core/standard.code-quality.review-baseline@1.0.0
+    outcome: CONFORMANT
+    evidence_ref: "ev-01J8Y1RQ0G2H4J6KVKX7ZC1PWN-secrets"
+    evidence:
+      evidence_kind: STRUCTURAL
+      description: "Varredura estática do diff revisado — nenhuma credencial ou chave detectada."
+      result: PASS
+      reproducible: true
+    waiver_ref: null
+  # nr.test-coverage-present NÃO aparece: resolve_effective_requirements(review-baseline, BASE)
+  # retorna apenas requires(BASE)=[nr.no-hardcoded-secrets] — Standards §10.1. O SHOULD do
+  # Standard existe, mas não integra o nível BASE; não é "not_applicable", é simplesmente
+  # fora do conjunto resolvido para este Binding.
+
+conformance_claims:
+  - claim_ref: "cc-01J8Y1RQ0G2H4J6KVKX7ZC1PWN-1"
+    subject: core/skill.static-analysis.code-review@1.0.0
+    standard: core/standard.code-quality.review-baseline@1.0.0
+    level: BASE
+    mode: STRICT                          # todo MUST/MUST_NOT satisfeito, indeterminate=∅,
+                                            # zero SHOULD no conjunto resolvido — Compliance §4.3
+    satisfied:
+      - "core/standard.code-quality.review-baseline@1.0.0#nr.no-hardcoded-secrets"
+    unsatisfied_should: []
+    not_applicable: []
+    indeterminate: []
+    evidence_refs: ["ev-01J8Y1RQ0G2H4J6KVKX7ZC1PWN-secrets"]
+
+binding_satisfactions:
+  - binding:
+      standard: core/standard.code-quality.review-baseline@1.0.0
+      conformance_level: BASE
+      conformance_mode: STRICT
+      enforcement_mode: BLOCKING
+      origin: "POLICY(core/policy.code-quality.mandatory-review@1.0.0)"
+      precedence_level: DOMAIN
+    claim_ref: "cc-01J8Y1RQ0G2H4J6KVKX7ZC1PWN-1"
+    satisfied: true
+    reason: CLAIM_STRICT                  # Compliance §4.4, CM14 — Strict sempre satisfaz
+    waiver_ref: null
+
+summary:
+  overall: SATISFIED                       # todo binding do EPS satisfeito — dispatch prossegue
+  bindings_total: 1
+  bindings_satisfied: 1
+  bindings_violated: 0
+
+# Consequência institucional (fora do escopo deste Artifact — Compliance §1, §5 invariante 3):
+# Execution.Dispatch(step.run-code-review) prossegue para Running, exatamente como
+# já narrado em docs/reference-cycle-walkthrough.md §2. Este Report é o QUE JUSTIFICA
+# essa continuação, agora expresso como dado, não apenas como afirmação em prosa.

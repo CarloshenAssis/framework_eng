@@ -8,7 +8,7 @@
 
 ## 1. Onde estamos
 
-A infraestrutura institucional está **completa**: 21 documentos de arquitetura ratificados, do Constitution ao Compliance Architecture, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, já existem **9 ciclos de referência** de conteúdo real (Standards, Policies, Skills, Agent, Workflows, Organization, records de Certificação/RoleAssignment/Knowledge) — um piloto pequeno e deliberado, não uma biblioteca em volume, cujo objetivo foi validar cada peça da arquitetura sobre dado concreto antes de qualquer geração em escala.
+A infraestrutura institucional está **completa**: 21 documentos de arquitetura ratificados, do Constitution ao Compliance Architecture, sem nenhuma RFC além de RFC-DM-001. Sobre essa base, já existem **10 ciclos de referência** de conteúdo real (Standards, Policies, Skills, Agent, Workflows, Organization, records de Certificação/RoleAssignment/Knowledge/Compliance) — um piloto pequeno e deliberado, não uma biblioteca em volume, cujo objetivo foi validar cada peça da arquitetura sobre dado concreto antes de qualquer geração em escala.
 
 Analogia atualizada: o sistema operacional está completo e **um programa de referência já roda nele**, ponta a ponta, com falhas e recuperação reais — mas a "loja de aplicativos" (biblioteca ampla de Standards/Skills/Agents/Workflows) ainda não existe.
 
@@ -46,7 +46,7 @@ Analogia atualizada: o sistema operacional está completo e **um programa de ref
 
 ---
 
-## 3. Conteúdo real — 9 ciclos de referência
+## 3. Conteúdo real — 10 ciclos de referência
 
 Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualquer coisa deve existir), o conteúdo abaixo é **instância real**, em `components/`, `records/` e `bundles/`.
 
@@ -60,32 +60,33 @@ Ao contrário dos documentos da Seção 2 (arquitetura — regras de como qualqu
 | 6 | `Knowledge` derivada de Executions do Ciclo 5; `Playbook` (Knowledge Asset) que a `codifies` | Fecha RFC-DM-001 C1 em conteúdo real; `derives_from` e `provenance()` sobre Knowledge, não só Artifact |
 | 7 | Segundo domínio (documentação de API); Workflow sem Agent/Branch/Decision; primeiro uso de `GATE_AUTO` | Arquitetura não impõe complexidade decisória onde não é necessária; vinculação normativa local (`standards_bound`) exercitada sozinha, sem Policy |
 | 8 | `Bundle` — exporta o Workflow do Ciclo 1 com fecho de dependências via Composition, verifica digest, narra importação em deployment separado | Fecha o único documento de arquitetura (Packaging & Distribution) sem nenhum conteúdo até então; expõe deliberadamente que Standards/Policies não viajam no fecho de Composition |
-| 9 | `Standard Package` (`standard_kind: PACKAGE`) agregando os dois Standards de `core/` via `includes` | Fecha o último mecanismo nomeado de arquitetura sem exemplo real |
+| 9 | `Standard Package` (`standard_kind: PACKAGE`) agregando os dois Standards de `core/` via `includes` | Fecha o último mecanismo nomeado de arquitetura sem exemplo real (dos 20 documentos daquele momento) |
+| 10 | `Compliance Assessment` real (RUNTIME) formalizando o dispatch do Ciclo 1; nova Policy `extended-pilot` (nível EXTENDED, `conformance_mode: PARTIAL_ACCEPTABLE`, `overrides`); `ConformanceClaim{PARTIAL}` real; `BindingSatisfaction` nos três ramos (`CLAIM_STRICT`, `CLAIM_PARTIAL_ACCEPTED`, `CLAIM_PARTIAL_REJECTED`); Waiver de Binding | Fecha o 21º documento (Compliance Architecture) sem nenhum conteúdo até então; exercita com dado real a lacuna encontrada e corrigida durante a ratificação (`conformance_mode` determinando satisfação de Binding) |
 
 Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execution real foi processada por um runtime — os ciclos são ilustrativos, mostrando a forma exata que os artefatos assumiriam.
 
-**Marco atingido no Ciclo 9:** todos os 20 documentos e todo mecanismo nomeado de arquitetura ratificados agora têm pelo menos um exemplo real exercitando-os — nenhum permanece "só em prosa".
+**Marco atingido no Ciclo 9** (revisado pelo Ciclo 10): todos os documentos e todo mecanismo nomeado de arquitetura ratificados **até aquele momento** (20) tinham pelo menos um exemplo real exercitando-os. A ratificação de Compliance Architecture como 21º documento, na mesma sessão, reabriu essa lacuna por um ciclo; o Ciclo 10 a fecha novamente — ver `docs/reference-cycle-10-walkthrough.md`.
 
 ---
 
 ## 4. Princípios estruturais provados
 
-- **Zero inflação de entidade** em 20 documentos de arquitetura + 9 ciclos de conteúdo.
-- **Reuso em vez de criação**: *cycle detection* (Kernel §7) reaplicado 6+ vezes; padrão "Value Object escopado a Contract" usado por Capability/Phase/Step/NormativeRequirement/PolicyBinding/Template/TestCase; padrão "família nomeada de Decision" usado por CertificationGrant/RoleAssignment; os dois caminhos de vinculação normativa (Policy derivada vs. `standards_bound` local) comprovadamente intercambiáveis, não um substituindo o outro por acidente.
-- **Correção sem reescrita silenciosa**: erros reais foram encontrados durante a instanciação de conteúdo (nome de fase prometendo garantia inexistente; ordem AG2 violada) — corrigidos com nota explicando o quê, por quê, quando — nunca apagados.
+- **Zero inflação de entidade** em 21 documentos de arquitetura + 10 ciclos de conteúdo.
+- **Reuso em vez de criação**: *cycle detection* (Kernel §7) reaplicado 6+ vezes; padrão "Value Object escopado a Contract" usado por Capability/Phase/Step/NormativeRequirement/PolicyBinding/Template/TestCase; padrão "família nomeada de Decision" usado por CertificationGrant/RoleAssignment/Waiver; os dois caminhos de vinculação normativa (Policy derivada vs. `standards_bound` local) comprovadamente intercambiáveis, não um substituindo o outro por acidente — inclusive quando entram em níveis diferentes e precisam de união não trivial (Ciclo 10).
+- **Correção sem reescrita silenciosa**: erros reais foram encontrados durante a instanciação de conteúdo (nome de fase prometendo garantia inexistente; ordem AG2 violada) e durante a ratificação de arquitetura (`conformance_mode` ausente do rascunho de Compliance) — corrigidos com nota explicando o quê, por quê, quando — nunca apagados.
 - **Fronteiras arquiteturais expostas, não escondidas**: o Ciclo 8 mostra deliberadamente o que acontece quando alguém ignora uma fronteira documentada (fecho de Composition ≠ vinculação normativa) em vez de fingir que o problema não existe.
-- **Nenhuma RFC adicional** foi necessária em nenhum momento, nem durante a arquitetura, nem durante os 9 ciclos de conteúdo.
+- **Nenhuma RFC adicional** foi necessária em nenhum momento, nem durante a arquitetura, nem durante os 10 ciclos de conteúdo.
 
 ---
 
 ## 5. O que ainda NÃO existe
 
-- Biblioteca ampla de Standards/Skills/Agents/Workflows (o piloto tem ~6 Skills, 1 Agent, 5 Workflows, 5 Standards — não dezenas)
-- Conteúdo real exercitando `Compliance Architecture` (Compliance Assessment, Conformance Claim, Binding Satisfaction) — documento ratificado (§2), mas sem ciclo de referência próprio ainda
+- Biblioteca ampla de Standards/Skills/Agents/Workflows (o piloto tem ~6 Skills, 1 Agent, 5 Workflows, 6 Standards, 3 Policies — não dezenas)
 - Query real de `Observability` (trace/provenance) mostrada como saída literal de uma consulta, não só narrada em prosa
 - Terceiro domínio de conteúdo (os dois existentes são code-quality/release e documentação de API)
+- `Compliance Drift` (§4.6) e `Risk Acceptance` (§4.7) — as duas peças nomeadas de Compliance Architecture que o Ciclo 10 não exercitou (focou em Assessment/Claim/Binding Satisfaction/Waiver de Binding, a lacuna que motivou o ciclo)
 
-**Fechado no Ciclo 9:** `Standard Package` (`standard_kind: PACKAGE`) — era a única peça nomeada de arquitetura sem exemplo real, entre os 20 documentos daquele momento. **Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21 (§2) — não há mais documento de arquitetura em estado de rascunho não ratificado. O que resta em aberto é decisão de escala (biblioteca em volume) ou de escopo (terceiro domínio, ciclo de conteúdo para Compliance), não validação arquitetural.
+**Fechado no Ciclo 9:** `Standard Package` — última peça nomeada de arquitetura sem exemplo real, entre os 20 documentos daquele momento. **Fechado nesta sessão:** ratificação de `Compliance Architecture` como documento 21, e — no mesmo fôlego — Ciclo 10, que lhe dá conteúdo real. Não há mais documento de arquitetura em estado de rascunho não ratificado, nem documento ratificado sem nenhum exemplo. O que resta em aberto é decisão de escala (biblioteca em volume) ou de escopo (terceiro domínio de conteúdo, ciclo adicional para Drift/Risk Acceptance), não validação arquitetural de nenhum mecanismo central.
 
 ---
 
@@ -95,12 +96,13 @@ Ressalva presente em `components/README.md` e `records/README.md`: nenhuma Execu
 [RATIFICADO — infraestrutura completa, 21 documentos]
 Constitution → ... → Testing → Packaging & Distribution → Compliance Architecture
 
-[CONCLUÍDO — piloto de conteúdo, 9 ciclos — todo mecanismo nomeado exercitado nos 20 primeiros documentos]
-Reference Cycle 1-9 (components/, records/, bundles/)
+[CONCLUÍDO — piloto de conteúdo, 10 ciclos — todo mecanismo central exercitado nos 21 documentos]
+Reference Cycle 1-10 (components/, records/, bundles/)
 
 [CANDIDATOS PARA CONTINUAÇÃO FUTURA — sem ordem obrigatória, nenhum bloqueante]
 - Terceiro domínio de conteúdo
-- Décimo ciclo de referência, exercitando Compliance Architecture (Assessment, Conformance Claim, Binding Satisfaction)
+- Ciclo de referência para Compliance Drift e Risk Acceptance (§4.6, §4.7 — únicas
+  peças de Compliance Architecture ainda sem exemplo real)
 
 [DEPOIS — biblioteca em volume, só após decisão explícita de escalar]
 Standards/Skills/Templates/Agents/Workflows reais em quantidade
@@ -132,11 +134,12 @@ docs/
   CHECKPOINT.md                 este arquivo
   architecture/                  texto integral dos 21 documentos ratificados (ver Seção 2)
     01-constitution.md .. 21-compliance-architecture.md
-  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..9)
+  reference-cycle-N-walkthrough.md   narrativa de cada ciclo de conteúdo (N=1..10)
 components/                    Manifests reais de Component (Standard/Policy/Skill/Agent/Workflow/Organization/Playbook)
   core/                          namespace compartilhado
   org.acme-corp/                 namespace de tenant, filho de core/
-records/                       Decision Records instanciados (Certification, RoleAssignment, Knowledge)
+records/                       Decision Records e Artifacts instanciados (Certification, RoleAssignment,
+                                 Knowledge, Compliance — ver records/README.md)
 bundles/                       Bundle — codificação física de transporte (Packaging & Distribution), não é entidade
 ```
 

@@ -1,0 +1,69 @@
+# Subject: core/skill.static-analysis.code-review@1.0.0
+# Tipo de registro: Decision Record, família Waiver (Governance §15; Compliance
+# Architecture §4.7 — granularidade de Binding, não de Normative Requirement)
+#
+# Nota de proveniência (Ciclo 10): este registro é uma análise COMPARATIVA, não
+# uma segunda Policy real. `core/policy.code-quality.extended-pilot@1.0.0`
+# (o único Binding real deste ciclo) declara `conformance_mode: PARTIAL_ACCEPTABLE`
+# — nenhum Waiver é necessário para ele, e nenhum foi emitido para essa Policy real
+# (ver extended-pilot.assessment.yaml, binding_satisfactions[0].waiver_ref: null).
+# Este registro mostra o que ocorreria, com a MESMA Evidence e o MESMO
+# ConformanceClaim já produzidos naquele Assessment, SE o Binding em vigor
+# exigisse `conformance_mode: STRICT` em vez de `PARTIAL_ACCEPTABLE` — o ramo
+# CM14 que o rascunho pré-ratificação de Compliance Architecture não conseguia
+# expressar (ver docs/architecture/21-compliance-architecture.md, nota de
+# ratificação). Existe para que o mecanismo de Waiver de Binding (§4.7) tenha
+# pelo menos um exemplo real de sua ESTRUTURA, não apenas de prosa descritiva —
+# mesma disciplina já aplicada a RoleAssignment no Ciclo 4.
+
+subject: core/skill.static-analysis.code-review@1.0.0
+hypothetical_binding:                    # NÃO um Component real — ver nota acima
+  standard: core/standard.code-quality.review-baseline@1.0.0
+  conformance_level: EXTENDED
+  conformance_mode: STRICT               # única diferença em relação ao Binding real do Ciclo 10
+  origin: "POLICY(core/policy.code-quality.extended-pilot@1.0.0, variante hipotética)"
+
+claim_ref: "cc-01J8Y3F90N4P6RVXMY9AD3SXA0-1"    # o MESMO Claim de extended-pilot.assessment.yaml —
+                                                   # nenhuma reavaliação de Evidence, só de Binding
+
+binding_satisfaction_without_waiver:
+  satisfied: false
+  reason: CLAIM_PARTIAL_REJECTED          # Compliance §4.4, CM14 — claim.mode=PARTIAL contra
+                                            # binding.conformance_mode=STRICT, sem Waiver
+
+decisions:
+  - subtype: WAIVER_GRANT
+    granularity: BINDING                  # Compliance §4.7 — distinto de granularity: NR
+                                            # (ComplianceVerdict.waiver_ref, não usado aqui)
+    scope: "core/skill.static-analysis.code-review@1.0.0 × hypothetical_binding acima"
+    reason: >
+      Ferramenta de coleta de TEST_RESULT para nr.test-coverage-present ainda em
+      calibração para diffs desta categoria (achado idêntico ao já registrado no
+      Claim real do piloto) — mesmo motivo que justificou PARTIAL_ACCEPTABLE na
+      Policy real; aqui documentado como o motivo que, sob STRICT, exigiria
+      Waiver explícito em vez de aceitação automática pelo Binding.
+    effective_from: "2026-07-25T17:30:00Z"
+    expires_at: "2026-08-25T17:30:00Z"      # prazo obrigatório — Governance §15, sem exceção
+    owner: role.governance-area.code-quality.steward
+    closing_condition: >
+      Encerra quando nr.test-coverage-present passar a CONFORMANT para este
+      subject em reassessment, OU quando o prazo expirar sem remediação — o que
+      ocorrer primeiro (Governance §13, mesmo fluxo de notificação e suspensão).
+    authorized_by: role.governance-area.code-quality.steward
+    co_authorized_by: role.governance-area.code-quality.human-lead
+    # Governance §15: "aprovação pela mesma autoridade que aprovaria a mudança
+    # formal equivalente" — a mudança equivalente seria alterar conformance_mode
+    # de STRICT para PARTIAL_ACCEPTABLE na própria Policy, que exige a mesma
+    # dupla autorização de qualquer alteração normativa (Governance §8).
+    visibility: PUBLIC                      # Governance §15 — visível junto ao componente afetado
+
+binding_satisfaction_with_waiver:
+  satisfied: true
+  reason: WAIVED                           # Compliance §4.4 — waiver NÃO reclassifica claim.mode
+                                            # para STRICT (CM4); apenas o Binding passa a satisfied=true
+  waiver_ref: "this-record#decisions[0]"
+
+# Nota (CM4, Compliance §4.7): o Waiver acima MUST NOT alterar `claim.mode`, que
+# permanece PARTIAL para sempre nesta Evidence — apenas `BindingSatisfaction.reason`
+# muda de CLAIM_PARTIAL_REJECTED para WAIVED. A distinção auditável entre "atingiu
+# Strict" e "foi dispensado de precisar" nunca é apagada.

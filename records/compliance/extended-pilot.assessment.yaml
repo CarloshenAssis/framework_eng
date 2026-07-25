@@ -1,0 +1,117 @@
+# Subject: Execution de step.run-code-review, sob core/policy.code-quality.extended-pilot
+# Tipo de registro: Artifact, ComplianceReport (Compliance Architecture §4, §5)
+#
+# Segunda dispatch ilustrativa do mesmo Skill, agora depois de
+# core/policy.code-quality.extended-pilot@1.0.0 entrar em vigência (17:00Z) e
+# suprimir mandatory-review via `overrides`. Existe para dar um caso REAL a
+# `ConformanceClaim{mode: PARTIAL}` e a `BindingSatisfaction` quando o Binding
+# aceita Partial (`conformance_mode: PARTIAL_ACCEPTABLE`) — o ramo "aceito" de
+# CM14. Ver `extended-pilot-strict-waiver.yaml` para o ramo "rejeitado".
+
+assessment:
+  assessment_id: "cmp-01J8Y3F92R6T8VBXMY1AD5SXC2"
+  kind: RUNTIME
+  subject: core/skill.static-analysis.code-review@1.0.0
+  execution_context:
+    orchestration_id: "wf-01J8Y3F90N4P6RVXMY9AD3SXA0"      # nova orquestração, PR distinto
+    phase_id: phase.static-review
+    step_id: step.run-code-review
+    attempt: 0
+    namespace_ancestry: [core]
+  context_snapshot_id: "cs-01J8Y3F90N4P6RVXMY9AD3SXA0-0"
+  evaluated_at: "2026-07-25T17:30:00Z"                       # após effective_from do piloto
+  performed_by: role.system.compliance-service
+
+effective_policy_set_ref: "eps-01J8Y3F90N4P6RVXMY9AD3SXA0"
+resolution_trace:
+  # Policy §11.1 — agora AMBAS as Policies de core/ passam nos filtros LIFECYCLE/TEMPORAL/
+  # PLANE/SCOPE/CONDITION (Fase 2); a diferença com o Assessment anterior é só o relógio.
+  candidates_considered:
+    - core/policy.code-quality.mandatory-review@1.0.0
+    - core/policy.code-quality.extended-pilot@1.0.0
+  filtered_out: []
+  suppressed_by_override:
+    - [core/policy.code-quality.extended-pilot@1.0.0, core/policy.code-quality.mandatory-review@1.0.0]
+    # Policy §7.3, Fase 3 do algoritmo — mandatory-review MUST NOT permanecer candidata
+    # depois de suprimida; PL4 não bloqueia porque review-baseline é DOMAIN, não GLOBAL.
+  conflicts_resolved: []                   # nada a resolver — só 1 Policy sobrevive à Fase 3
+  standards_bound_merged:
+    - standard: core/standard.code-quality.review-baseline@1.0.0
+      level: EXTENDED
+      merge_outcome: POLICY_STRONGER       # Kernel §2.14 (BASE) ∪ Policy-derivado (EXTENDED) —
+                                             # EXTENDED ⊇ BASE (monotônico, Standards §4.4) prevalece,
+                                             # mesma regra de Policy §7.5, agora com níveis DIFERENTES
+                                             # (primeira vez no piloto que este ramo é exercitado)
+
+verdicts:
+  - nr_id: "core/standard.code-quality.review-baseline@1.0.0#nr.no-hardcoded-secrets"
+    standard: core/standard.code-quality.review-baseline@1.0.0
+    outcome: CONFORMANT
+    evidence_ref: "ev-01J8Y3F90N4P6RVXMY9AD3SXA0-secrets"
+    evidence:
+      evidence_kind: STRUCTURAL
+      description: "Varredura estática do diff revisado — nenhuma credencial ou chave detectada."
+      result: PASS
+      reproducible: true
+    waiver_ref: null
+
+  - nr_id: "core/standard.code-quality.review-baseline@1.0.0#nr.test-coverage-present"
+    standard: core/standard.code-quality.review-baseline@1.0.0
+    outcome: NON_CONFORMANT               # avaliado (evidência EXISTE), achado é negativo —
+                                            # diferente de INDETERMINATE, que exigiria ausência de evidência
+    evidence_ref: "ev-01J8Y3F90N4P6RVXMY9AD3SXA0-coverage"
+    evidence:
+      evidence_kind: TEST_RESULT
+      description: >
+        TestRunReport correlacionado ao diff revisado (Testing Architecture §6,
+        Evidence{TEST_RESULT}): nenhum teste correspondente às linhas alteradas
+        foi encontrado na suíte executada. Evidência de AUSÊNCIA de cobertura,
+        não ausência de avaliação — por isso NON_CONFORMANT, não INDETERMINATE.
+      test_run_id: "tr-01J8Y3F90N4P6RVXMY9AD3SXA0"
+      outcome: FAIL
+      reproducible: true
+    waiver_ref: null                       # SHOULD não satisfeito não exige Waiver — Standards §8.2
+                                            # já o declara "não bloqueante" nesse modo; ver Compliance §4.7
+
+conformance_claims:
+  - claim_ref: "cc-01J8Y3F90N4P6RVXMY9AD3SXA0-1"
+    subject: core/skill.static-analysis.code-review@1.0.0
+    standard: core/standard.code-quality.review-baseline@1.0.0
+    level: EXTENDED
+    mode: PARTIAL                          # todo MUST satisfeito, indeterminate=∅,
+                                             # ao menos um SHOULD não satisfeito — Standards §8.2
+    satisfied:
+      - "core/standard.code-quality.review-baseline@1.0.0#nr.no-hardcoded-secrets"
+    unsatisfied_should:
+      - "core/standard.code-quality.review-baseline@1.0.0#nr.test-coverage-present"   # Standards ST8 — enumeração obrigatória
+    not_applicable: []
+    indeterminate: []
+    evidence_refs:
+      - "ev-01J8Y3F90N4P6RVXMY9AD3SXA0-secrets"
+      - "ev-01J8Y3F90N4P6RVXMY9AD3SXA0-coverage"
+
+binding_satisfactions:
+  - binding:
+      standard: core/standard.code-quality.review-baseline@1.0.0
+      conformance_level: EXTENDED
+      conformance_mode: PARTIAL_ACCEPTABLE
+      enforcement_mode: BLOCKING
+      origin: "POLICY(core/policy.code-quality.extended-pilot@1.0.0)"
+      precedence_level: DOMAIN
+    claim_ref: "cc-01J8Y3F90N4P6RVXMY9AD3SXA0-1"
+    satisfied: true
+    reason: CLAIM_PARTIAL_ACCEPTED          # Compliance §4.4, CM14 — claim.mode=PARTIAL E
+                                              # binding.conformance_mode=PARTIAL_ACCEPTABLE ⟹ satisfied
+    waiver_ref: null                         # nenhum Waiver necessário — o Binding já aceita Partial
+
+summary:
+  overall: SATISFIED
+  bindings_total: 1
+  bindings_satisfied: 1
+  bindings_violated: 0
+
+# Nota comparativa (Ciclo 10, ver docs/reference-cycle-10-walkthrough.md):
+# a MESMA Evidence acima, avaliada sob um Binding STRICT em vez de PARTIAL_ACCEPTABLE,
+# produziria satisfied=false, reason=CLAIM_PARTIAL_REJECTED — exatamente o ramo que
+# o rascunho pré-ratificação de Compliance Architecture não conseguia expressar.
+# Ver extended-pilot-strict-waiver.yaml para esse ramo, com Waiver de Binding real.
